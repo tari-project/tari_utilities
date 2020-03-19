@@ -48,6 +48,9 @@ pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Vec<String> {
 /// Decode a hex string into bytes.
 pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     let hex_trim = hex_str.trim();
+    if !hex_str.is_ascii() {
+        return Err(HexError::HexConversionError);
+    }
     let hex_trim = if (hex_trim.len() >= 2) && (&hex_trim[..2] == "0x") {
         &hex_trim[2..]
     } else {
@@ -96,6 +99,8 @@ mod test {
         assert_eq!(from_hex(&"0x800000ff").unwrap(), vec![128, 0, 0, 255]);
         assert!(from_hex(&"800").is_err()); // Odd number of bytes
         assert!(from_hex(&"8080gf").is_err()); // Invalid hex character g
+                                               // unicode strings have odd lengths and can cause panics
+        assert!(from_hex("🖖🥴").is_err());
     }
 
     #[test]
