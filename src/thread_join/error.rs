@@ -20,14 +20,14 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use derive_error::Error;
+use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq, Clone)]
 pub enum ThreadError {
-    /// An error occurred attempting to join the thread
+    #[error("An error occurred attempting to join the thread")]
     JoinError,
-    /// The timeout period allocated to the thread joining process has been exceeded
+    #[error("The timeout period allocated to the thread joining process has been exceeded")]
     TimeoutReached,
-    /// The channel has disconnected between the host and the join thread
+    #[error("The channel has disconnected between the host and the join thread")]
     ChannelDisconnected,
 }
