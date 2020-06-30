@@ -1,4 +1,4 @@
-// Copyright 2019 The Tari Project
+// Copyright 2020. The Tari Project
 //
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 // following conditions are met:
@@ -20,24 +20,35 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#[allow(clippy::needless_range_loop)]
-pub mod bit;
-pub mod byte_array;
-pub mod ciphers;
-pub mod convert;
-pub mod epoch_time;
-pub mod extend_bytes;
-pub mod fixed_set;
-pub mod hash;
-pub mod hex;
-#[macro_use]
-pub mod locks;
-pub mod message_format;
-pub mod thread_join;
+use std::convert::TryInto;
 
-pub use self::extend_bytes::ExtendBytes;
+/// Tries to convert a series of `T`s to `U`s, returning an error at the first failure
+pub fn try_convert_all<T, U, I>(into_iter: I) -> Result<Vec<U>, T::Error>
+where
+    I: IntoIterator<Item = T>,
+    T: TryInto<U>,
+{
+    let iter = into_iter.into_iter();
+    let mut result = Vec::with_capacity(iter.size_hint().0);
+    for item in iter {
+        result.push(item.try_into()?);
+    }
+    Ok(result)
+}
 
-pub use self::{
-    byte_array::{ByteArray, ByteArrayError},
-    hash::Hashable,
-};
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn convert_all() {
+        let a: Vec<u32> = try_convert_all(vec![1i64, 2, 3, 4, 5]).unwrap();
+        assert_eq!(a, [1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn convert_all_failed() {
+        let err = try_convert_all::<_, u32, _>(vec![std::i64::MAX, 2, 3, 4, 5]).unwrap_err();
+        assert_eq!(err.to_string(), "out of range integral type conversion attempted");
+    }
+}
