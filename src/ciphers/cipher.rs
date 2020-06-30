@@ -21,18 +21,18 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use crate::{ByteArray, ByteArrayError};
-use derive_error::Error;
+use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum CipherError {
-    /// Provided key is the incorrect size to be used by the Cipher
+    #[error("Provided key is the incorrect size to be used by the Cipher")]
     KeyLengthError,
-    /// Provided Nonce is the incorrect size to be used by the Cipher
+    #[error("Provided Nonce is the incorrect size to be used by the Cipher")]
     NonceLengthError,
-    /// No data was provided for encryption/decryption
+    #[error("No data was provided for encryption/decryption")]
     NoDataError,
-    /// Byte Array conversion error
-    ByteArrayError(ByteArrayError),
+    #[error("Byte Array conversion error")]
+    ByteArrayError(#[from] ByteArrayError),
 }
 
 /// A trait describing an interface to a symmetrical encryption scheme

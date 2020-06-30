@@ -21,14 +21,13 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use crate::hex::{from_hex, to_hex, Hex, HexError};
-use derive_error::Error;
+use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum ByteArrayError {
-    // Could not create a ByteArray when converting from a different format
-    #[error(msg_embedded, non_std, no_from)]
+    #[error("Could not create a ByteArray when converting from a different format: {0}")]
     ConversionError(String),
-    // The input data was the incorrect length to perform the desired conversion
+    #[error("The input data was the incorrect length to perform the desired conversion")]
     IncorrectLength,
 }
 

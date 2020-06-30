@@ -1,9 +1,9 @@
-use derive_error::Error;
 use serde::Serializer;
 use std::{
     fmt::{LowerHex, Write},
     num::ParseIntError,
 };
+use thiserror::Error;
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
 pub trait Hex {
@@ -18,11 +18,11 @@ pub trait Hex {
 
 #[derive(Debug, Error)]
 pub enum HexError {
-    /// Only hexadecimal characters (0-9,a-f) are permitted
-    InvalidCharacter(ParseIntError),
-    /// Hex string lengths must be a multiple of 2
+    #[error("Only hexadecimal characters (0-9,a-f) are permitted")]
+    InvalidCharacter(#[from] ParseIntError),
+    #[error("Hex string lengths must be a multiple of 2")]
     LengthError,
-    /// Invalid hex representation for the target type
+    #[error("Invalid hex representation for the target type")]
     HexConversionError,
 }
 

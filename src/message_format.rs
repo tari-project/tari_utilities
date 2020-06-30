@@ -21,22 +21,20 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use base64;
-use derive_error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum MessageFormatError {
-    // An error occurred serialising an object into binary
-    #[error(no_from, no_std)]
+    #[error("An error occurred serialising an object into binary")]
     BinarySerializeError,
-    // An error occurred deserialising binary data into an object
-    #[error(no_from, no_std)]
+    #[error("An error occurred deserialising binary data into an object")]
     BinaryDeserializeError,
-    // An error occurred de-/serialising an object from/into JSON
-    JSONError(serde_json::error::Error),
-    // An error occurred deserialising an object from Base64
-    Base64DeserializeError(base64::DecodeError),
+    #[error("An error occurred de-/serialising an object from/into JSON")]
+    JSONError(#[from] serde_json::error::Error),
+    #[error("An error occurred deserialising an object from Base64")]
+    Base64DeserializeError(#[from] base64::DecodeError),
 }
 
 pub trait MessageFormat: Sized {
