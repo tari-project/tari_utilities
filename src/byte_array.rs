@@ -91,10 +91,10 @@ impl ByteArray for [u8; 32] {
 impl<T: ByteArray> Hex for T {
     fn from_hex(hex: &str) -> Result<Self, HexError> {
         let v = from_hex(hex)?;
-        Self::from_vec(&v).map_err(|_| HexError::HexConversionError)
+        Self::from_bytes(&v).map_err(|_| HexError::HexConversionError)
     }
 
     fn to_hex(&self) -> String {
-        to_hex(&self.to_vec())
+        to_hex(self.as_bytes())
     }
 }
