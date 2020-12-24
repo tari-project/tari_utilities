@@ -29,7 +29,7 @@ pub enum HexError {
 /// Encode the provided bytes into a hex string
 pub fn to_hex<T>(bytes: &[T]) -> String
 where T: LowerHex {
-    let mut s = String::new();
+    let mut s = String::with_capacity(bytes.len() * 2);
     for byte in bytes {
         write!(&mut s, "{:02x}", byte).expect("Unable to write");
     }
