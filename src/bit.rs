@@ -20,6 +20,8 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use std::mem;
+
 /// Converts a single input byte to 8 bits (little-endian)
 pub fn byte_to_bits(value: u8) -> [bool; 8] {
     let mut bits = [false; 8];
@@ -30,12 +32,36 @@ pub fn byte_to_bits(value: u8) -> [bool; 8] {
 }
 
 /// Converts a single input integer to a vector of bits (little-endian)
-pub fn uint_to_bits(value: usize, bit_count: usize) -> Vec<bool> {
-    let mut bits: Vec<bool> = vec![false; bit_count];
+/// Returns None if `bit_count` is higher than the number of bits in usize.
+pub fn checked_uint_to_bits(value: usize, bit_count: usize) -> Option<Vec<bool>> {
+    if bit_count > mem::size_of::<usize>() * 8 {
+        return None;
+    }
+
+    let mut bits = vec![false; bit_count];
     for i in 0..bit_count {
         bits[i] = value & (1 << i) != 0;
     }
-    (bits)
+    Some(bits)
+}
+
+/// Converts a single input integer to a vector of bits (little-endian)
+///
+/// ## Panics
+///
+/// This function will panic if `bit_count` is set higher than the number of bits in usize (typically, 32 or 64).
+#[deprecated(
+    since = "0.3.1",
+    note = "uint_to_bits is deprecated, use checked_uint_to_bits instead"
+)]
+pub fn uint_to_bits(value: usize, bit_count: usize) -> Vec<bool> {
+    assert!(
+        bit_count < mem::size_of::<usize>() * 8,
+        "bit_count must be less than or equal to the number of bits in usize ({})",
+        mem::size_of::<usize>() * 8
+    );
+
+    checked_uint_to_bits(value, bit_count).unwrap()
 }
 
 /// Converts a array of input bits (little-endian) to a single byte
@@ -76,4 +102,30 @@ pub fn bits_to_bytes(bits: &[bool]) -> Vec<u8> {
         bytes[i] = bits_to_byte(curr_bits) as u8;
     }
     (bytes)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    mod checked_uint_to_bits {
+        use super::*;
+        use std::convert;
+
+        #[test]
+        fn it_returns_empty_vec_if_bit_count_is_zero() {
+            assert!(checked_uint_to_bits(std::usize::MAX, 0).unwrap().is_empty());
+        }
+
+        #[test]
+        fn it_returns_none_given_too_many_bits() {
+            assert!(checked_uint_to_bits(std::usize::MAX, 1337).is_none());
+        }
+
+        #[test]
+        fn it_returns_bits_for_max_value() {
+            let bits = checked_uint_to_bits(std::usize::MAX, mem::size_of::<usize>() * 8).unwrap();
+            assert!(bits.into_iter().all(convert::identity));
+        }
+    }
 }
