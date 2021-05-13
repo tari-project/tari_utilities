@@ -45,25 +45,6 @@ pub fn checked_uint_to_bits(value: usize, bit_count: usize) -> Option<Vec<bool>>
     Some(bits)
 }
 
-/// Converts a single input integer to a vector of bits (little-endian)
-///
-/// ## Panics
-///
-/// This function will panic if `bit_count` is set higher than the number of bits in usize (typically, 32 or 64).
-#[deprecated(
-    since = "0.3.1",
-    note = "uint_to_bits is deprecated, use checked_uint_to_bits instead"
-)]
-pub fn uint_to_bits(value: usize, bit_count: usize) -> Vec<bool> {
-    assert!(
-        bit_count < mem::size_of::<usize>() * 8,
-        "bit_count must be less than or equal to the number of bits in usize ({})",
-        mem::size_of::<usize>() * 8
-    );
-
-    checked_uint_to_bits(value, bit_count).unwrap()
-}
-
 /// Converts a array of input bits (little-endian) to a single byte
 pub fn bits_to_byte(bits: [bool; 8]) -> u8 {
     let mut value: u8 = 0;
