@@ -1,3 +1,5 @@
+use std::mem;
+
 // Copyright 2019 The Tari Project
 //
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -48,12 +50,20 @@ pub fn bits_to_byte(bits: [bool; 8]) -> u8 {
 }
 
 /// Converts a vector of input bits (little-endian) to its integer representation
-pub fn bits_to_uint(bits: &[bool]) -> usize {
-    let mut value: usize = 0;
-    for i in 0..bits.len() {
-        value |= (bits[i] as usize) << i;
+/// Returns None if the length of `bits` is greater than the number of bits in a `usize`, which would cause an attempt
+/// to shift left with overflow
+pub fn checked_bits_to_uint(bits: &[bool]) -> Option<usize> {
+    const PTR_SIZE_BITS: usize = mem::size_of::<usize>() * 8;
+
+    if bits.len() > PTR_SIZE_BITS {
+        None
+    } else {
+        let mut value: usize = 0;
+        for i in 0..bits.len() {
+            value |= (bits[i] as usize) << i;
+        }
+        Some(value)
     }
-    (value)
 }
 
 /// Converts a vector of input bytes to a vector of bits
