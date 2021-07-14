@@ -23,7 +23,6 @@
 #[allow(clippy::needless_range_loop)]
 pub mod bit;
 pub mod byte_array;
-pub mod ciphers;
 pub mod convert;
 pub mod epoch_time;
 pub mod extend_bytes;
