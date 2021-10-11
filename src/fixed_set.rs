@@ -104,6 +104,12 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
     pub fn into_vec(self) -> Vec<T> {
         self.items.into_iter().filter_map(|v| v).collect()
     }
+
+    /// Returns an iterator that yields exactly `n` elements of the FixedSet. An element may be not be set which yields
+    /// a None.
+    pub fn iter(&self) -> impl Iterator<Item = Option<&T>> + '_ {
+        self.items.iter().map(|e| e.as_ref())
+    }
 }
 
 //-------------------------------------------         Tests              ---------------------------------------------//
@@ -195,5 +201,15 @@ mod test {
         assert_eq!(s.sum(), Some(14));
         s.set_item(1, 0);
         assert_eq!(s.sum(), Some(10));
+    }
+
+    #[test]
+    fn iterator() {
+        let mut s = FixedSet::<usize>::new(5);
+        s.set_item(0, 3);
+        s.set_item(3, 2);
+        s.set_item(1, 1);
+        let elems = s.iter().collect::<Vec<_>>();
+        assert_eq!(elems, vec![Some(&3), Some(&1), None, Some(&2), None]);
     }
 }
