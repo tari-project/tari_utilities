@@ -28,6 +28,6 @@ Data structure describing a fixed set of size _n_
 
 Representing time as a `u64`.
 
-## Ciphers
+## encryption
 
-Various cipher implementations
+An in-place AES encryption and decryption helper function

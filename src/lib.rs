@@ -20,11 +20,11 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-pub mod encoding;
 #[allow(clippy::needless_range_loop)]
 pub mod bit;
 pub mod byte_array;
 pub mod convert;
+pub mod encoding;
 pub mod epoch_time;
 pub mod extend_bytes;
 pub mod fixed_set;
@@ -32,6 +32,7 @@ pub mod hash;
 pub mod hex;
 #[macro_use]
 pub mod locks;
+pub mod encryption;
 pub mod message_format;
 pub mod thread_join;
 
