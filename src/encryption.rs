@@ -21,7 +21,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use aes_gcm::{
-    aead::{generic_array::GenericArray, Aead},
+    aead::{generic_array::GenericArray, Aead, Error as AeadError},
     Aes256Gcm,
 };
 use rand::{rngs::OsRng, RngCore};
@@ -36,7 +36,7 @@ pub trait Encryptable<C> {
 
 pub fn decrypt_bytes_integral_nonce(cipher: &Aes256Gcm, ciphertext: Vec<u8>) -> Result<Vec<u8>, String> {
     if ciphertext.len() < AES_NONCE_BYTES {
-        return Err(AeadError);
+        return Err(AeadError.to_string());
     }
     let (nonce, cipher_text) = ciphertext.split_at(AES_NONCE_BYTES);
     let nonce = GenericArray::from_slice(nonce);
