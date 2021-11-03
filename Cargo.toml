@@ -21,5 +21,6 @@ rand = "0.7.2"
 newtype-ops = "0.1.4"
 bitflags = "1.2.1"
 base58-monero = {version = "0.2.0", default-features= false}
+time = "0.3.4"
 
 [dev-dependencies]
