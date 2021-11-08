@@ -23,7 +23,13 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use newtype_ops::newtype_ops;
 use serde::{Deserialize, Serialize};
-use std::{fmt, ops::Div};
+use std::{
+    convert::{TryFrom, TryInto},
+    fmt,
+    ops::Div,
+};
+use thiserror::Error;
+use time::OffsetDateTime;
 
 /// The timestamp, defined as the amount of seconds past from UNIX epoch.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Deserialize, Serialize)]
@@ -103,6 +109,32 @@ impl From<DateTime<Utc>> for EpochTime {
 impl From<EpochTime> for DateTime<Utc> {
     fn from(value: EpochTime) -> Self {
         DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(value.0 as i64, 0), Utc)
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum TimeConvertError {
+    #[error("Can't convert time range: {0}")]
+    InvalidRange(#[from] time::error::ComponentRange),
+    #[error("Can't convert a number into a time value: {0}")]
+    NumError(#[from] std::num::TryFromIntError),
+}
+
+impl TryFrom<OffsetDateTime> for EpochTime {
+    type Error = TimeConvertError;
+
+    fn try_from(value: OffsetDateTime) -> Result<Self, TimeConvertError> {
+        let sec = value.unix_timestamp().try_into()?;
+        Ok(EpochTime(sec))
+    }
+}
+
+impl TryFrom<EpochTime> for OffsetDateTime {
+    type Error = TimeConvertError;
+
+    fn try_from(value: EpochTime) -> Result<Self, TimeConvertError> {
+        let sec = value.0.try_into()?;
+        OffsetDateTime::from_unix_timestamp(sec).map_err(TimeConvertError::from)
     }
 }
 
