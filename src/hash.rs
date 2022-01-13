@@ -24,3 +24,7 @@
 pub trait Hashable {
     fn hash(&self) -> Vec<u8>;
 }
+
+pub trait TryHashable {
+    fn try_hash(&self) -> Result<Vec<u8>, String>;
+}
