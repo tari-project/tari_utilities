@@ -95,6 +95,6 @@ impl<T: ByteArray> Hex for T {
     }
 
     fn to_hex(&self) -> String {
-        to_hex(&self.to_vec())
+        to_hex(self.as_bytes())
     }
 }
