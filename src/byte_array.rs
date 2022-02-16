@@ -47,7 +47,8 @@ pub trait ByteArray: Sized {
     }
 
     /// Try and convert the given byte array to the implemented type. Any failures (incorrect array length,
-    /// implementation-specific checks, etc) return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory note.
+    /// implementation-specific checks, etc) return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory
+    /// note.
     fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError>;
 
     /// Return the type as a byte array.
