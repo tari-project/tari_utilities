@@ -20,6 +20,8 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! A trait that offers representation of data types as a byte array or hex string.
+
 use crate::hex::{from_hex, to_hex, Hex, HexError};
 use thiserror::Error;
 
@@ -31,27 +33,24 @@ pub enum ByteArrayError {
     IncorrectLength,
 }
 
-/// Many of the types in this crate are just large numbers (256 bit usually). This trait provides the common
-/// functionality for  types  like secret keys, signatures, commitments etc. to be converted to and from byte arrays
-/// and hexadecimal formats.
 #[allow(clippy::ptr_arg)]
 pub trait ByteArray: Sized {
-    /// Return the type as a byte vector
+    /// Return the type as a byte vector.
     fn to_vec(&self) -> Vec<u8> {
         self.as_bytes().to_vec()
     }
 
-    /// Try and convert the given byte vector to the implemented type. Any failures (incorrect string length etc)
-    /// return a [KeyError](enum.KeyError.html) with an explanatory note.
+    /// Try and convert the given byte vector to the implemented type. Any failures (incorrect string length, etc)
+    /// return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory note.
     fn from_vec(v: &Vec<u8>) -> Result<Self, ByteArrayError> {
         Self::from_bytes(v.as_slice())
     }
 
     /// Try and convert the given byte array to the implemented type. Any failures (incorrect array length,
-    /// implementation-specific checks, etc) return a [ByteArrayError](enum.ByteArrayError.html).
+    /// implementation-specific checks, etc) return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory note.
     fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError>;
 
-    /// Return the type as a byte array
+    /// Return the type as a byte array.
     fn as_bytes(&self) -> &[u8];
 }
 
@@ -96,5 +95,22 @@ impl<T: ByteArray> Hex for T {
 
     fn to_hex(&self) -> String {
         to_hex(self.as_bytes())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_error_handling() {
+        let err = <[u8; 32]>::from_bytes(&[1, 2, 3, 4]).unwrap_err();
+        assert_eq!(err, ByteArrayError::IncorrectLength);
+
+        let err = <[u8; 32]>::from_hex("abcd").unwrap_err();
+        match &err {
+            HexError::HexConversionError => (),
+            _ => panic!(),
+        };
     }
 }
