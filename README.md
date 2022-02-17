@@ -6,28 +6,48 @@ A set of useful and commonly used utilities that are used in several places in t
 
 ## bit
 
-integer to bit array functions
+Functions for conversion between integer and bit array.
 
 ## byte_array
 
 A trait that offers representation of data types as a byte array or hex string. See also extend_bytes and message_format.
 
-## hash
+## convert
 
-A simple hash trait
+Function which tries to convert a series of `T`s to `U`s.
 
-## hex
+## encoding
 
-Binary <-> Hex string conversions
-
-## Fixed set
-
-Data structure describing a fixed set of size _n_
+A trait that handles base58 encoding and decoding.
 
 ## Epoch time
 
-Representing time as a `u64`.
+Data structure representing time as a `u64`.
 
-## Ciphers
+## extend_bytes
 
-Various cipher implementations
+A trait allows us to call append_raw_bytes and get the raw bytes of the type.
+
+## Fixed set
+
+Data structure describing a fixed set of size _n_.
+
+## hash
+
+A simple `Hashable` trait which is used to describe how an object should be hashed.
+
+## hex
+
+Functions for conversion between binary and hex string.
+
+## locks
+
+Macros for RwLock.
+
+## message_format
+
+A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
+
+## thread_join
+
+A `ThreadJoinWithTimeout` trait which enables `thread::JoinHandle` to have a timeout join member function.

@@ -20,6 +20,8 @@
 //  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! A `ThreadJoinWithTimeout` trait which enables `thread::JoinHandle` to have a timeout join member function.
+
 use crate::thread_join::ThreadError;
 use std::{
     sync::mpsc::{sync_channel, RecvTimeoutError, SyncSender},

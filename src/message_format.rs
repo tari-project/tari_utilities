@@ -20,6 +20,8 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
+
 use base64;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json;
@@ -207,7 +209,7 @@ mod test {
         match err {
             MessageFormatError::BinaryDeserializeError => {},
             _ => {
-                panic!("Base64 conversion should fail");
+                panic!("Binary conversion should fail");
             },
         }
     }
