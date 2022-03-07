@@ -20,7 +20,8 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/// This trait is used to describe how an object should be hashed
+//! A simple `Hashable` trait which is used to describe how an object should be hashed.
+
 pub trait Hashable {
     fn hash(&self) -> Vec<u8>;
 }

@@ -20,6 +20,8 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! Macros for RwLock.
+
 /// Recovers a poisoned lock by returning the value before the lock was poisoned
 #[macro_export]
 macro_rules! recover_lock {
@@ -34,10 +36,9 @@ macro_rules! recover_lock {
     };
 }
 
-/// This macro unlocks a Mutex or RwLock. If the lock is poisoned (i.e. a panic before a MutexGuard / RwLockGuard is
-/// dropped) the last value before the panic occurred is used.
-///
-/// This macro should not be used if the implementation should fail a if the lock was poisoned.
+/// This macro returns a Mutex or RwLock guard without returning a `PoisonError`.
+/// If the lock is poisoned (i.e. a panic before a MutexGuard / RwLockGuard is dropped), the last value before the panic
+/// occurred is used. The semantics of this macro are similar to a database transaction rollback on failure.
 #[macro_export]
 macro_rules! acquire_lock {
     ($e:expr, $m:ident) => {

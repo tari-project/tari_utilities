@@ -20,6 +20,8 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! Data structure representing time as a `u64`.
+
 use chrono::{DateTime, NaiveDateTime, Utc};
 use newtype_ops::newtype_ops;
 use serde::{Deserialize, Serialize};
@@ -46,17 +48,18 @@ impl EpochTime {
         self.0
     }
 
-    /// This will return a new EpochTime increased by the amount of seconds given
-    /// This will panic if combined EpochTime and seconds are larger than U64::MAX
+    /// Return a new EpochTime increased by the amount of seconds given.
+    /// It will panic if combined EpochTime and seconds are larger than U64::MAX
     pub fn increase(self, seconds: u64) -> EpochTime {
         let num = seconds.checked_add(self.0);
         let value = match num {
             Some(v) => v,
-            _ => panic!("u64 overlfow in timestamp"),
+            _ => panic!("u64 overflow in timestamp"),
         };
         EpochTime(value)
     }
 
+    /// Checked EpochTime subtraction. Computes self - other, returning None if overflow occurred.
     pub fn checked_sub(self, other: EpochTime) -> Option<EpochTime> {
         match self.0.checked_sub(other.0) {
             None => None,
