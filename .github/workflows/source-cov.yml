@@ -15,6 +15,10 @@ jobs:
           sudo apt install -y jq lcov
       - name: Download Rust
         uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2022-01-08
+          override: true
+          components: llvm-tools-preview
       - name: Install llvm-tools
         run: |
           rustup component add llvm-tools-preview
