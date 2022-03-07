@@ -1,5 +1,7 @@
 # Tari Utilities
 
+[![Coverage Status](https://coveralls.io/repos/github/tari-project/tari_utilities/badge.svg)](https://coveralls.io/github/tari-project/tari_utilities)
+
 This crate is part of the [Tari Cryptocurrency](https://tari.com) project.
 
 A set of useful and commonly used utilities that are used in several places in the Tari project.

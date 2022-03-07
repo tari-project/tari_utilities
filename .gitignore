@@ -19,9 +19,11 @@ tags
 # Custom formatting files
 .rustfmt.toml
 .clippy.toml
+default.profraw
 
 # Ignore Code Coverage Report files
-report
+cov_raw
+coverage_report
 
 Cargo.lock
 *.log
