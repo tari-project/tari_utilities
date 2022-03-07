@@ -11,7 +11,7 @@
 # $ sudo apt install lcov
 
 RUSTFLAGS="-Z instrument-coverage"
-LLVM_PROFILE_FILE="./cov_raw/tari_crypto-%m.profraw"
+LLVM_PROFILE_FILE="./cov_raw/tari_utilities-%m.profraw"
 
 get_binaries() {
   files=$( RUSTFLAGS=$RUSTFLAGS cargo test --tests --no-run --message-format=json \
@@ -24,12 +24,12 @@ get_binaries() {
 get_binaries
 
 # Remove old coverage files
-rm cov_raw/*profraw cov_raw/tari_crypto.profdata cov_raw/tari_crypto.lcov cov_raw/tari_crypto.txt
+rm cov_raw/*profraw cov_raw/tari_utilities.profdata cov_raw/tari_utilities.lcov cov_raw/tari_utilities.txt
 
 RUSTFLAGS=$RUSTFLAGS LLVM_PROFILE_FILE=$LLVM_PROFILE_FILE cargo test --tests
 
 cargo profdata -- \
-  merge -sparse ./cov_raw/tari_crypto-*.profraw -o ./cov_raw/tari_crypto.profdata
+  merge -sparse ./cov_raw/tari_utilities-*.profraw -o ./cov_raw/tari_utilities.profdata
 
 cargo cov -- \
   export \
@@ -40,9 +40,9 @@ cargo cov -- \
     --show-region-summary \
     --ignore-filename-regex='/.cargo/registry' \
     --ignore-filename-regex="^/rustc" \
-    --instr-profile=cov_raw/tari_crypto.profdata \
+    --instr-profile=cov_raw/tari_utilities.profdata \
     $files \
-    > cov_raw/tari_crypto.lcov
+    > cov_raw/tari_utilities.lcov
 
 cargo cov -- \
   show \
@@ -52,12 +52,12 @@ cargo cov -- \
     --show-region-summary \
     --ignore-filename-regex='/.cargo/registry' \
     --ignore-filename-regex="^/rustc" \
-    --instr-profile=cov_raw/tari_crypto.profdata \
+    --instr-profile=cov_raw/tari_utilities.profdata \
     $files \
-    > cov_raw/tari_crypto.txt
+    > cov_raw/tari_utilities.txt
 
 if [ -z ${SKIP_HTML+x} ]; then
-  genhtml -o coverage_report cov_raw/tari_crypto.lcov
+  genhtml -o coverage_report cov_raw/tari_utilities.lcov
 else
   echo "Skipping html generation"
 fi
