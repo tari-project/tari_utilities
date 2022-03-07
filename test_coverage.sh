@@ -26,7 +26,7 @@ get_binaries
 # Remove old coverage files
 rm cov_raw/*profraw cov_raw/tari_crypto.profdata cov_raw/tari_crypto.lcov cov_raw/tari_crypto.txt
 
-RUSTFLAGS=$RUSTFLAGS LLVM_PROFILE_FILE=$LLVM_PROFILE_FILE cargo +nightly test --tests
+RUSTFLAGS=$RUSTFLAGS LLVM_PROFILE_FILE=$LLVM_PROFILE_FILE cargo test --tests
 
 cargo profdata -- \
   merge -sparse ./cov_raw/tari_crypto-*.profraw -o ./cov_raw/tari_crypto.profdata
