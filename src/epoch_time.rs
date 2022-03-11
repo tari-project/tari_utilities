@@ -22,14 +22,15 @@
 
 //! Data structure representing time as a `u64`.
 
-use chrono::{DateTime, NaiveDateTime, Utc};
-use newtype_ops::newtype_ops;
-use serde::{Deserialize, Serialize};
 use std::{
     convert::{TryFrom, TryInto},
     fmt,
     ops::Div,
 };
+
+use chrono::{DateTime, NaiveDateTime, Utc};
+use newtype_ops::newtype_ops;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use time::OffsetDateTime;
 

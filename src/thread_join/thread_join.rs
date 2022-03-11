@@ -22,12 +22,13 @@
 
 //! A `ThreadJoinWithTimeout` trait which enables `thread::JoinHandle` to have a timeout join member function.
 
-use crate::thread_join::ThreadError;
 use std::{
     sync::mpsc::{sync_channel, RecvTimeoutError, SyncSender},
     thread::{self, JoinHandle},
     time::Duration,
 };
+
+use crate::thread_join::ThreadError;
 
 #[derive(Debug)]
 pub enum StatusMessage {
@@ -79,8 +80,9 @@ where T: 'static
 
 #[cfg(test)]
 mod test {
-    use crate::thread_join::ThreadJoinWithTimeout;
     use std::{thread, time::Duration};
+
+    use crate::thread_join::ThreadJoinWithTimeout;
 
     #[test]
     fn test_normal_thread_join() {

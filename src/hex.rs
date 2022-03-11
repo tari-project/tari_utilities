@@ -22,11 +22,12 @@
 
 //! Functions for conversion between binary and hex string.
 
-use serde::Serializer;
 use std::{
     fmt::{LowerHex, Write},
     num::ParseIntError,
 };
+
+use serde::Serializer;
 use thiserror::Error;
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.

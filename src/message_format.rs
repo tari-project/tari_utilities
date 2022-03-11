@@ -82,9 +82,10 @@ where T: DeserializeOwned + Serialize
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use base64::DecodeError as Base64Error;
     use serde::{Deserialize, Serialize};
+
+    use super::*;
 
     #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
     struct TestMessage {
