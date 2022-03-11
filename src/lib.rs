@@ -35,9 +35,8 @@ pub mod locks;
 pub mod message_format;
 pub mod thread_join;
 
-pub use self::extend_bytes::ExtendBytes;
-
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
+    extend_bytes::ExtendBytes,
     hash::Hashable,
 };

@@ -22,8 +22,9 @@
 
 //! A trait that offers representation of data types as a byte array or hex string.
 
-use crate::hex::{from_hex, to_hex, Hex, HexError};
 use thiserror::Error;
+
+use crate::hex::{from_hex, to_hex, Hex, HexError};
 
 #[derive(Debug, Error, PartialEq)]
 pub enum ByteArrayError {

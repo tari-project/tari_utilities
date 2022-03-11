@@ -100,8 +100,9 @@ mod test {
     use super::*;
 
     mod checked_uint_to_bits {
-        use super::*;
         use std::convert;
+
+        use super::*;
 
         #[test]
         fn it_returns_empty_vec_if_bit_count_is_zero() {

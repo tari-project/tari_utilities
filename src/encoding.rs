@@ -22,8 +22,9 @@
 
 //! A trait that handles base58 encoding and decoding.
 
-use crate::{ByteArray, ByteArrayError};
 use thiserror::Error;
+
+use crate::{ByteArray, ByteArrayError};
 
 pub trait Base58 {
     fn from_base58(hex: &str) -> Result<Self, Base58Error>
@@ -54,8 +55,9 @@ impl<T: ByteArray> Base58 for T {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use rand::{rngs::OsRng, RngCore};
+
+    use super::*;
 
     #[test]
     fn decoding() {
