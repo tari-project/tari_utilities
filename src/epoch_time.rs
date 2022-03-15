@@ -23,16 +23,13 @@
 //! Data structure representing time as a `u64`.
 
 use std::{
-    convert::{TryFrom, TryInto},
     fmt,
     ops::Div,
+    time::{SystemTime, UNIX_EPOCH},
 };
 
-use chrono::{DateTime, NaiveDateTime, Utc};
 use newtype_ops::newtype_ops;
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
-use time::OffsetDateTime;
 
 /// The timestamp, defined as the amount of seconds past from UNIX epoch.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Deserialize, Serialize)]
@@ -41,7 +38,17 @@ pub struct EpochTime(u64);
 impl EpochTime {
     /// return UTC current as EpochTime
     pub fn now() -> EpochTime {
-        EpochTime(Utc::now().timestamp() as u64)
+        EpochTime(
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("SystemTime before UNIX EPOCH!")
+                .as_secs(),
+        )
+    }
+
+    /// Creates a new EpochTime representing the number of seconds since the unix epoch (1970-01-01 00:00:00 UTC)
+    pub fn from_secs_since_epoch(secs: u64) -> EpochTime {
+        EpochTime(secs)
     }
 
     /// Return the EpochTime as a u64
@@ -52,26 +59,17 @@ impl EpochTime {
     /// Return a new EpochTime increased by the amount of seconds given.
     /// It will panic if combined EpochTime and seconds are larger than U64::MAX
     pub fn increase(self, seconds: u64) -> EpochTime {
-        let num = seconds.checked_add(self.0);
-        let value = match num {
-            Some(v) => v,
-            _ => panic!("u64 overflow in timestamp"),
-        };
+        let value = seconds.checked_add(self.0).expect("u64 overflow in timestamp");
         EpochTime(value)
+    }
+
+    pub fn checked_add(self, other: EpochTime) -> Option<EpochTime> {
+        self.0.checked_add(other.0).map(EpochTime)
     }
 
     /// Checked EpochTime subtraction. Computes self - other, returning None if overflow occurred.
     pub fn checked_sub(self, other: EpochTime) -> Option<EpochTime> {
-        match self.0.checked_sub(other.0) {
-            None => None,
-            Some(v) => Some(EpochTime(v)),
-        }
-    }
-}
-
-impl Default for EpochTime {
-    fn default() -> Self {
-        EpochTime(Utc::now().timestamp() as u64)
+        self.0.checked_sub(other.0).map(EpochTime)
     }
 }
 
@@ -101,44 +99,6 @@ impl fmt::Display for EpochTime {
 impl From<u64> for EpochTime {
     fn from(value: u64) -> Self {
         EpochTime(value)
-    }
-}
-
-impl From<DateTime<Utc>> for EpochTime {
-    fn from(value: DateTime<Utc>) -> Self {
-        EpochTime(value.timestamp() as u64)
-    }
-}
-
-impl From<EpochTime> for DateTime<Utc> {
-    fn from(value: EpochTime) -> Self {
-        DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(value.0 as i64, 0), Utc)
-    }
-}
-
-#[derive(Error, Debug)]
-pub enum TimeConvertError {
-    #[error("Can't convert time range: {0}")]
-    InvalidRange(#[from] time::error::ComponentRange),
-    #[error("Can't convert a number into a time value: {0}")]
-    NumError(#[from] std::num::TryFromIntError),
-}
-
-impl TryFrom<OffsetDateTime> for EpochTime {
-    type Error = TimeConvertError;
-
-    fn try_from(value: OffsetDateTime) -> Result<Self, TimeConvertError> {
-        let sec = value.unix_timestamp().try_into()?;
-        Ok(EpochTime(sec))
-    }
-}
-
-impl TryFrom<EpochTime> for OffsetDateTime {
-    type Error = TimeConvertError;
-
-    fn try_from(value: EpochTime) -> Result<Self, TimeConvertError> {
-        let sec = value.0.try_into()?;
-        OffsetDateTime::from_unix_timestamp(sec).map_err(TimeConvertError::from)
     }
 }
 

@@ -26,7 +26,6 @@ pub mod byte_array;
 pub mod convert;
 pub mod encoding;
 pub mod epoch_time;
-pub mod extend_bytes;
 pub mod fixed_set;
 pub mod hash;
 pub mod hex;
@@ -37,6 +36,5 @@ pub mod thread_join;
 
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
-    extend_bytes::ExtendBytes,
     hash::Hashable,
 };
