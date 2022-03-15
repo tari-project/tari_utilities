@@ -69,7 +69,7 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         self.items.iter().all(Option::is_some)
     }
 
-    /// Return the index of the given item in the set by performing a linear search through the set
+    /// Return the first index of the given item in the set by performing a linear search through the set
     pub fn search(&self, val: &T) -> Option<usize> {
         let key = self
             .items
@@ -114,7 +114,7 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
     }
 }
 
-//-------------------------------------------         Tests              ---------------------------------------------//
+//----------------------------------------------         Tests         ----------------------------------------------//
 
 #[cfg(test)]
 mod test {
@@ -188,6 +188,7 @@ mod test {
         assert_eq!(s.search(&data("carrot")), Some(2));
         assert_eq!(s.search(&data("vimes")), Some(0));
         assert_eq!(s.search(&data("librarian")), None);
+        assert_eq!(s.search(&data("random")), None);
     }
 
     #[test]
@@ -213,5 +214,13 @@ mod test {
         s.set_item(1, 1);
         let elems = s.iter().collect::<Vec<_>>();
         assert_eq!(elems, vec![Some(&3), Some(&1), None, Some(&2), None]);
+    }
+
+    #[test]
+    fn into_vec() {
+        let mut s = FixedSet::<usize>::new(5);
+        s.set_item(1, 5);
+        s.set_item(3, 3);
+        assert_eq!(s.into_vec(), vec![5, 3]);
     }
 }

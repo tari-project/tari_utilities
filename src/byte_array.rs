@@ -105,14 +105,34 @@ mod test {
     use super::*;
 
     #[test]
+    fn from_to_vec() {
+        let v = vec![0u8, 1, 128, 255];
+        let ba = <Vec<u8>>::from_vec(&v).unwrap();
+        assert_eq!(ba.to_vec(), v);
+    }
+
+    #[test]
+    fn from_to_array() {
+        let v = vec![
+            0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+            29, 30, 31,
+        ];
+        let ba = <[u8; 32]>::from_vec(&v).unwrap();
+        assert_eq!(ba.to_vec(), v);
+    }
+
+    #[test]
+    fn from_to_hex() {
+        let v = <Vec<u8>>::from_hex("deadbeef").unwrap();
+        assert_eq!(v.to_hex(), "deadbeef");
+    }
+
+    #[test]
     fn test_error_handling() {
         let err = <[u8; 32]>::from_bytes(&[1, 2, 3, 4]).unwrap_err();
         assert_eq!(err, ByteArrayError::IncorrectLength);
 
         let err = <[u8; 32]>::from_hex("abcd").unwrap_err();
-        match &err {
-            HexError::HexConversionError => (),
-            _ => panic!(),
-        };
+        assert!(matches!(err, HexError::HexConversionError));
     }
 }

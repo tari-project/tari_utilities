@@ -99,6 +99,13 @@ pub fn checked_bits_to_uint(bits: &[bool]) -> Option<usize> {
 mod test {
     use super::*;
 
+    #[test]
+    fn bytes_to_bits_and_back() {
+        let input = [0u8, 127, 128, 255];
+        let output = bytes_to_bits(&input);
+        let control = bits_to_bytes(&output[..]);
+        assert_eq!(control, input);
+    }
     mod checked_uint_to_bits {
         use std::convert;
 

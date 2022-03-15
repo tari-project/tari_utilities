@@ -107,6 +107,62 @@ mod test {
     use super::*;
 
     #[test]
+    fn now() {
+        let a = EpochTime::now();
+        let b = EpochTime::now();
+        assert!(a <= b);
+    }
+
+    #[test]
+    fn as_u64() {
+        let time = EpochTime::from(1234567);
+        assert_eq!(time.as_u64(), 1234567);
+    }
+
+    #[test]
+    fn increase() {
+        let a = EpochTime::from(1111);
+        assert_eq!(a.increase(123), EpochTime::from(1234));
+    }
+
+    #[test]
+    #[should_panic]
+    fn increase_overflow() {
+        let a = EpochTime::from(1234);
+        a.increase(u64::MAX);
+    }
+
+    #[test]
+    fn checked_add() {
+        let a = EpochTime::from(1111);
+        let b = EpochTime::from_secs_since_epoch(123);
+        assert_eq!(a.checked_add(b), Some(EpochTime::from(1234)));
+        let b = EpochTime::from(u64::MAX);
+        assert_eq!(a.checked_add(b), None);
+    }
+
+    #[test]
+    fn checked_sub() {
+        let a = EpochTime::from(1234);
+        let b = EpochTime::from(123);
+        assert_eq!(a.checked_sub(b), Some(EpochTime::from(1111)));
+        assert_eq!(b.checked_sub(a), None);
+    }
+
+    #[test]
+    fn test_div() {
+        let a = EpochTime::from(3639);
+        let b = EpochTime::from(3);
+        assert_eq!(1213, a / b);
+    }
+
+    #[test]
+    fn display() {
+        let time = EpochTime::from(1234567);
+        assert_eq!("1234567", format!("{}", time));
+    }
+
+    #[test]
     fn add_epoch_time() {
         assert_eq!(EpochTime::from(1_000) + EpochTime::from(8_000), EpochTime::from(9_000));
         assert_eq!(&EpochTime::from(15) + &EpochTime::from(5), EpochTime::from(20));
