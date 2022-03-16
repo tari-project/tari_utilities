@@ -71,15 +71,9 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
 
     /// Return the index of the given item in the set by performing a linear search through the set
     pub fn search(&self, val: &T) -> Option<usize> {
-        let key = self
-            .items
+        self.items
             .iter()
-            .enumerate()
-            .find(|v| v.1.is_some() && v.1.as_ref().unwrap() == val);
-        match key {
-            Some(item) => Some(item.0),
-            None => None,
-        }
+            .position(|item| item.as_ref().map(|i| i == val).unwrap_or(false))
     }
 
     /// Produces the sum of the values in the set, provided the set is full
@@ -104,7 +98,7 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
 
     /// Collects all non-empty elements of the set into a Vec instance
     pub fn into_vec(self) -> Vec<T> {
-        self.items.into_iter().filter_map(|v| v).collect()
+        self.items.into_iter().flatten().collect()
     }
 
     /// Returns an iterator that yields exactly `n` elements of the FixedSet. An element may be not be set which yields

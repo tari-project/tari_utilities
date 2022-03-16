@@ -23,6 +23,7 @@
 //! A `ThreadJoinWithTimeout` trait which enables `thread::JoinHandle` to have a timeout join member function.
 
 pub mod error;
+#[allow(clippy::module_inception)]
 pub mod thread_join;
 
 pub use self::{error::ThreadError, thread_join::ThreadJoinWithTimeout};
