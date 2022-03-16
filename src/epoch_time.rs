@@ -58,6 +58,7 @@ impl EpochTime {
 
     /// Return a new EpochTime increased by the amount of seconds given.
     /// It will panic if combined EpochTime and seconds are larger than U64::MAX
+    #[must_use]
     pub fn increase(self, seconds: u64) -> EpochTime {
         let value = seconds.checked_add(self.0).expect("u64 overflow in timestamp");
         EpochTime(value)
