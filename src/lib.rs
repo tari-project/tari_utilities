@@ -38,7 +38,6 @@ pub mod hex;
 #[macro_use]
 pub mod locks;
 pub mod message_format;
-pub mod thread_join;
 
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
