@@ -36,7 +36,7 @@ use serde::{Deserialize, Serialize};
 pub struct EpochTime(u64);
 
 impl EpochTime {
-    /// return UTC current as EpochTime
+    /// Return UTC current as EpochTime.
     pub fn now() -> EpochTime {
         EpochTime(
             SystemTime::now()
@@ -46,24 +46,28 @@ impl EpochTime {
         )
     }
 
-    /// Creates a new EpochTime representing the number of seconds since the unix epoch (1970-01-01 00:00:00 UTC)
+    /// Creates a new EpochTime representing the number of seconds since the unix epoch (1970-01-01 00:00:00 UTC).
     pub fn from_secs_since_epoch(secs: u64) -> EpochTime {
         EpochTime(secs)
     }
 
-    /// Return the EpochTime as a u64
+    /// Return the EpochTime as a u64.
     pub fn as_u64(self) -> u64 {
         self.0
     }
 
     /// Return a new EpochTime increased by the amount of seconds given.
-    /// It will panic if combined EpochTime and seconds are larger than U64::MAX
+    ///
+    /// # Panics
+    ///
+    /// It will panic if combined EpochTime and seconds are larger than U64::MAX.
     #[must_use]
     pub fn increase(self, seconds: u64) -> EpochTime {
         let value = seconds.checked_add(self.0).expect("u64 overflow in timestamp");
         EpochTime(value)
     }
 
+    /// Checked EpochTime addition. Computes self + other, returning None if overflow occurred.
     pub fn checked_add(self, other: EpochTime) -> Option<EpochTime> {
         self.0.checked_add(other.0).map(EpochTime)
     }

@@ -32,13 +32,13 @@ use crate::thread_join::ThreadError;
 
 #[derive(Debug)]
 pub enum StatusMessage {
-    /// Successfully joined the thread
+    /// Successfully joined the thread.
     Ok,
-    /// An error occurred attempting to join the thread
+    /// An error occurred attempting to join the thread.
     Error,
 }
 
-/// Spawn a single thread that will attempt to join the specified thread
+/// Spawn a single thread that will attempt to join the specified thread.
 fn spawn_join_thread<T>(thread_handle: JoinHandle<T>, status_sync_sender: SyncSender<StatusMessage>)
 where T: 'static {
     thread::spawn(move || match thread_handle.join() {
@@ -47,7 +47,7 @@ where T: 'static {
     });
 }
 
-/// Perform a thread join with a timeout on the JoinHandle, it has a configurable timeout
+/// Perform a thread join with a timeout on the JoinHandle, it has a configurable timeout.
 fn timeout_join<T>(thread_handle: JoinHandle<T>, timeout_in_ms: Duration) -> Result<(), ThreadError>
 where T: 'static {
     let (status_sync_sender, status_receiver) = sync_channel(5);
@@ -65,11 +65,11 @@ where T: 'static {
 }
 
 pub trait ThreadJoinWithTimeout<T> {
-    /// Attempt to join the current thread with a configurable timeout
+    /// Attempt to join the current thread with a configurable timeout.
     fn timeout_join(self, timeout_in_ms: Duration) -> Result<(), ThreadError>;
 }
 
-/// Extend JoinHandle to have member functions that enable join with a timeout
+/// Extend JoinHandle to have member functions that enable join with a timeout.
 impl<T> ThreadJoinWithTimeout<T> for JoinHandle<T>
 where T: 'static
 {
