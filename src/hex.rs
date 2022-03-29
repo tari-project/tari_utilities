@@ -118,20 +118,20 @@ mod test {
 
     #[test]
     fn test_from_hex() {
-        assert_eq!(from_hex(&"00000000").unwrap(), vec![0, 0, 0, 0]);
-        assert_eq!(from_hex(&"0a0b0c0d").unwrap(), vec![10, 11, 12, 13]);
-        assert_eq!(from_hex(&" 0a0b0c0d  ").unwrap(), vec![10, 11, 12, 13]);
-        assert_eq!(from_hex(&"000000ff").unwrap(), vec![0, 0, 0, 255]);
-        assert_eq!(from_hex(&"0x800000ff").unwrap(), vec![128, 0, 0, 255]);
-        assert!(from_hex(&"800").is_err()); // Odd number of bytes
-        assert!(from_hex(&"8080gf").is_err()); // Invalid hex character g
-                                               // unicode strings have odd lengths and can cause panics
+        assert_eq!(from_hex("00000000").unwrap(), vec![0, 0, 0, 0]);
+        assert_eq!(from_hex("0a0b0c0d").unwrap(), vec![10, 11, 12, 13]);
+        assert_eq!(from_hex(" 0a0b0c0d  ").unwrap(), vec![10, 11, 12, 13]);
+        assert_eq!(from_hex("000000ff").unwrap(), vec![0, 0, 0, 255]);
+        assert_eq!(from_hex("0x800000ff").unwrap(), vec![128, 0, 0, 255]);
+        assert!(from_hex("800").is_err()); // Odd number of bytes
+        assert!(from_hex("8080gf").is_err()); // Invalid hex character g
+                                              // unicode strings have odd lengths and can cause panics
         assert!(from_hex("🖖🥴").is_err());
     }
 
     #[test]
     fn length_error() {
-        let result = from_hex(&"800");
+        let result = from_hex("800");
         assert!(result.is_err());
         let err = result.unwrap_err();
         match err {
@@ -144,7 +144,7 @@ mod test {
 
     #[test]
     fn character_error() {
-        let result = from_hex(&"1234567890ABCDEFG1");
+        let result = from_hex("1234567890ABCDEFG1");
         assert!(result.is_err());
         let err = result.unwrap_err();
         match &err {

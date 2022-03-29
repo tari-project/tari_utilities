@@ -110,6 +110,6 @@ mod test {
     #[test]
     fn add_epoch_time() {
         assert_eq!(EpochTime::from(1_000) + EpochTime::from(8_000), EpochTime::from(9_000));
-        assert_eq!(&EpochTime::from(15) + &EpochTime::from(5), EpochTime::from(20));
+        assert_eq!(EpochTime::from(15) + EpochTime::from(5), EpochTime::from(20));
     }
 }
