@@ -24,7 +24,7 @@
 
 use std::mem;
 
-/// Converts a single input byte to 8 bits (little-endian)
+/// Converts a single input byte to 8 bits (little-endian).
 pub fn byte_to_bits(value: u8) -> [bool; 8] {
     let mut bits = [false; 8];
     for i in 0..8 {
@@ -37,7 +37,7 @@ pub fn byte_to_bits(value: u8) -> [bool; 8] {
 pub fn bits_to_byte(bits: [bool; 8]) -> u8 {
     let mut value: u8 = 0;
     for i in 0..8 {
-        value |= (bits[i] as u8) << i;
+        value |= u8::from(bits[i]) << i;
     }
     value
 }
@@ -89,7 +89,7 @@ pub fn checked_bits_to_uint(bits: &[bool]) -> Option<usize> {
     } else {
         let mut value: usize = 0;
         for i in 0..bits.len() {
-            value |= (bits[i] as usize) << i;
+            value |= usize::from(bits[i]) << i;
         }
         Some(value)
     }

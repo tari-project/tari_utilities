@@ -35,12 +35,12 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         FixedSet { items: vec![None; n] }
     }
 
-    /// Returns the size of the fixed set, NOT the number of items that have been set
+    /// Returns the size of the fixed set, NOT the number of items that have been set.
     pub fn size(&self) -> usize {
         self.items.len()
     }
 
-    /// Set the `index`th item to `val`. Any existing item is overwritten. The set takes ownership of `val`.
+    /// Set the `index`-th item to `val`. Any existing item is overwritten. The set takes ownership of `val`.
     pub fn set_item(&mut self, index: usize, val: T) -> bool {
         if index >= self.items.len() {
             return false;
@@ -49,7 +49,7 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         true
     }
 
-    /// Return a reference to the `index`th item, or `None` if that item has not been set yet.
+    /// Return a reference to the `index`-th item, or `None` if that item has not been set yet.
     pub fn get_item(&self, index: usize) -> Option<&T> {
         match self.items.get(index) {
             None => None,
@@ -57,7 +57,7 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         }
     }
 
-    /// Delete an item from the set by setting the `index`th value to None
+    /// Delete an item from the set by setting the `index`-th value to `None`.
     pub fn clear_item(&mut self, index: usize) {
         if index < self.items.len() {
             self.items[index] = None;
@@ -69,14 +69,14 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         self.items.iter().all(Option::is_some)
     }
 
-    /// Return the index of the given item in the set by performing a linear search through the set
+    /// Return the index of the given item in the set by performing a linear search through the set.
     pub fn search(&self, val: &T) -> Option<usize> {
         self.items
             .iter()
             .position(|item| item.as_ref().map(|i| i == val).unwrap_or(false))
     }
 
-    /// Produces the sum of the values in the set, provided the set is full
+    /// Produces the sum of the values in the set, provided the set is full.
     pub fn sum(&self) -> Option<T>
     where for<'a> &'a T: Add<&'a T, Output = T> {
         // This function uses HTRB to work: See https://doc.rust-lang.org/nomicon/hrtb.html
@@ -96,13 +96,13 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         Some(sum)
     }
 
-    /// Collects all non-empty elements of the set into a Vec instance
+    /// Collects all non-empty elements of the set into a Vec instance.
     pub fn into_vec(self) -> Vec<T> {
         self.items.into_iter().flatten().collect()
     }
 
     /// Returns an iterator that yields exactly `n` elements of the FixedSet. An element may be not be set which yields
-    /// a None.
+    /// a `None`.
     pub fn iter(&self) -> impl Iterator<Item = Option<&T>> + '_ {
         self.items.iter().map(|e| e.as_ref())
     }
@@ -123,7 +123,7 @@ mod test {
     fn zero_sized_fixed_set() {
         let mut s = FixedSet::<usize>::new(0);
         assert!(s.is_full(), "Set should be full");
-        assert_eq!(s.set_item(1, 1), false, "Should not be able to set item");
+        assert!(!s.set_item(1, 1), "Should not be able to set item");
         assert_eq!(s.get_item(0), None, "Should not return a value");
         assert_eq!(s.sum(), Some(0));
     }
@@ -153,25 +153,25 @@ mod test {
     fn small_set() {
         let mut s = FixedSet::<Foo>::new(3);
         // Set is empty
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Add an item
         assert!(s.set_item(1, data("patrician")));
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Add an item
         assert!(s.set_item(0, data("vimes")));
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Replace an item
         assert!(s.set_item(1, data("rincewind")));
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Add item, filling set
         assert!(s.set_item(2, data("carrot")));
-        assert_eq!(s.is_full(), true);
+        assert!(s.is_full());
         // Try add an invalid item
-        assert_eq!(s.set_item(3, data("librarian")), false);
-        assert_eq!(s.is_full(), true);
+        assert!(!s.set_item(3, data("librarian")));
+        assert!(s.is_full());
         // Clear an item
         s.clear_item(1);
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Check contents
         assert_eq!(s.get_item(0).unwrap().baz, "Commander Vimes");
         assert!(s.get_item(1).is_none());
