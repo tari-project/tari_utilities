@@ -32,12 +32,15 @@ use thiserror::Error;
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
 pub trait Hex {
-    /// Try to convert the given hexadecimal string to the type. Any failures (incorrect  string length, non hex
-    /// characters, etc) return a [HexError](enum.HexError.html) with an explanatory note.
+    /// Try to convert the given hexadecimal string to the type.
+    ///
+    /// # Errors
+    /// Any failures (incorrect  string length, non hex characters, etc.) return a [HexError](enum.HexError.html) with
+    /// an explanatory note.
     fn from_hex(hex: &str) -> Result<Self, HexError>
     where Self: Sized;
 
-    /// Return the hexadecimal string representation of the type
+    /// Return the hexadecimal string representation of the type.
     fn to_hex(&self) -> String;
 }
 
@@ -51,7 +54,7 @@ pub enum HexError {
     HexConversionError,
 }
 
-/// Encode the provided bytes into a hex string
+/// Encode the provided bytes into a hex string.
 pub fn to_hex<T>(bytes: &[T]) -> String
 where T: LowerHex {
     let mut s = String::with_capacity(bytes.len() * 2);
@@ -61,7 +64,7 @@ where T: LowerHex {
     s
 }
 
-/// Encode the provided vector of bytes into a hex string
+/// Encode the provided vector of bytes into a hex string.
 pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Vec<String> {
     let mut result = Vec::new();
     for bytes in bytearray {
@@ -92,7 +95,7 @@ pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     Ok(result)
 }
 
-/// Use a serde serializer to serialize the hex string of the given object
+/// Use a serde serializer to serialize the hex string of the given object.
 pub fn serialize_to_hex<S, T>(t: &T, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -114,14 +117,14 @@ mod test {
 
     #[test]
     fn test_from_hex() {
-        assert_eq!(from_hex(&"00000000").unwrap(), vec![0, 0, 0, 0]);
-        assert_eq!(from_hex(&"0a0b0c0d").unwrap(), vec![10, 11, 12, 13]);
-        assert_eq!(from_hex(&" 0a0b0c0d  ").unwrap(), vec![10, 11, 12, 13]);
-        assert_eq!(from_hex(&"000000ff").unwrap(), vec![0, 0, 0, 255]);
-        assert_eq!(from_hex(&"0x800000ff").unwrap(), vec![128, 0, 0, 255]);
-        assert!(from_hex(&"800").is_err()); // Odd number of bytes
-        assert!(from_hex(&"8080gf").is_err()); // Invalid hex character g
-                                               // unicode strings have odd lengths and can cause panics
+        assert_eq!(from_hex("00000000").unwrap(), vec![0, 0, 0, 0]);
+        assert_eq!(from_hex("0a0b0c0d").unwrap(), vec![10, 11, 12, 13]);
+        assert_eq!(from_hex(" 0a0b0c0d  ").unwrap(), vec![10, 11, 12, 13]);
+        assert_eq!(from_hex("000000ff").unwrap(), vec![0, 0, 0, 255]);
+        assert_eq!(from_hex("0x800000ff").unwrap(), vec![128, 0, 0, 255]);
+        assert!(from_hex("800").is_err()); // Odd number of bytes
+        assert!(from_hex("8080gf").is_err()); // Invalid hex character g
+                                              // unicode strings have odd lengths and can cause panics
         assert!(from_hex("🖖🥴").is_err());
     }
 
@@ -134,7 +137,7 @@ mod test {
 
     #[test]
     fn length_error() {
-        let result = from_hex(&"800");
+        let result = from_hex("800");
         assert!(result.is_err());
         let err = result.unwrap_err();
         assert!(matches!(err, HexError::LengthError));
@@ -144,7 +147,7 @@ mod test {
 
     #[test]
     fn character_error() {
-        let result = from_hex(&"1234567890ABCDEFG1");
+        let result = from_hex("1234567890ABCDEFG1");
         assert!(result.is_err());
         let err = result.unwrap_err();
         assert!(matches!(err, HexError::InvalidCharacter(_)));

@@ -34,6 +34,7 @@ pub enum ByteArrayError {
     IncorrectLength,
 }
 
+/// ByteArray trait the allows converting to/from [array][[u8]]/[vec][[u8]].
 #[allow(clippy::ptr_arg)]
 pub trait ByteArray: Sized {
     /// Return the type as a byte vector.
@@ -41,14 +42,18 @@ pub trait ByteArray: Sized {
         self.as_bytes().to_vec()
     }
 
-    /// Try and convert the given byte vector to the implemented type. Any failures (incorrect string length, etc)
-    /// return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory note.
+    /// Try and convert the given byte vector to the implemented type.
+    ///
+    /// # Errors
+    ///
+    /// Any failures (incorrect string length, etc) return an [ByteArrayError](enum.ByteArrayError.html) with an
+    /// explanatory note.
     fn from_vec(v: &Vec<u8>) -> Result<Self, ByteArrayError> {
         Self::from_bytes(v.as_slice())
     }
 
     /// Try and convert the given byte array to the implemented type. Any failures (incorrect array length,
-    /// implementation-specific checks, etc) return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory
+    /// implementation-specific checks, etc.) return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory
     /// note.
     fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError>;
 
