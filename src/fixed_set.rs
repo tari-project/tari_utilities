@@ -123,7 +123,7 @@ mod test {
     fn zero_sized_fixed_set() {
         let mut s = FixedSet::<usize>::new(0);
         assert!(s.is_full(), "Set should be full");
-        assert_eq!(s.set_item(1, 1), false, "Should not be able to set item");
+        assert!(!s.set_item(1, 1), "Should not be able to set item");
         assert_eq!(s.get_item(0), None, "Should not return a value");
         assert_eq!(s.sum(), Some(0));
     }
@@ -153,25 +153,25 @@ mod test {
     fn small_set() {
         let mut s = FixedSet::<Foo>::new(3);
         // Set is empty
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Add an item
         assert!(s.set_item(1, data("patrician")));
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Add an item
         assert!(s.set_item(0, data("vimes")));
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Replace an item
         assert!(s.set_item(1, data("rincewind")));
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Add item, filling set
         assert!(s.set_item(2, data("carrot")));
-        assert_eq!(s.is_full(), true);
+        assert!(s.is_full());
         // Try add an invalid item
-        assert_eq!(s.set_item(3, data("librarian")), false);
-        assert_eq!(s.is_full(), true);
+        assert!(!s.set_item(3, data("librarian")));
+        assert!(s.is_full());
         // Clear an item
         s.clear_item(1);
-        assert_eq!(s.is_full(), false);
+        assert!(!s.is_full());
         // Check contents
         assert_eq!(s.get_item(0).unwrap().baz, "Commander Vimes");
         assert!(s.get_item(1).is_none());
