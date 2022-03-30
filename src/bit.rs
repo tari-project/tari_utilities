@@ -33,15 +33,6 @@ pub fn byte_to_bits(value: u8) -> [bool; 8] {
     bits
 }
 
-/// Converts a array of input bits (little-endian) to a single byte
-pub fn bits_to_byte(bits: [bool; 8]) -> u8 {
-    let mut value: u8 = 0;
-    for i in 0..8 {
-        value |= u8::from(bits[i]) << i;
-    }
-    value
-}
-
 /// Converts a vector of input bytes to a vector of bits
 pub fn bytes_to_bits(bytes: &[u8]) -> Vec<bool> {
     let mut bits: Vec<bool> = vec![false; bytes.len() * 8];
@@ -50,32 +41,6 @@ pub fn bytes_to_bits(bytes: &[u8]) -> Vec<bool> {
         bits[bit_index..(bit_index + 8)].copy_from_slice(&byte_to_bits(bytes[i]));
     }
     bits
-}
-
-/// Converts a vector of bits to a vector of bytes
-pub fn bits_to_bytes(bits: &[bool]) -> Vec<u8> {
-    let mut bytes: Vec<u8> = vec![0; bits.len() / 8];
-    let mut curr_bits: [bool; 8] = [false; 8];
-    for i in 0..bytes.len() {
-        let byte_index = i * 8;
-        curr_bits.copy_from_slice(&bits[byte_index..(byte_index + 8)]);
-        bytes[i] = bits_to_byte(curr_bits) as u8;
-    }
-    bytes
-}
-
-/// Converts a single input integer to a vector of bits (little-endian)
-/// Returns None if `bit_count` is higher than the number of bits in usize.
-pub fn checked_uint_to_bits(value: usize, bit_count: usize) -> Option<Vec<bool>> {
-    if bit_count > mem::size_of::<usize>() * 8 {
-        return None;
-    }
-
-    let mut bits = vec![false; bit_count];
-    for i in 0..bit_count {
-        bits[i] = value & (1 << i) != 0;
-    }
-    Some(bits)
 }
 
 /// Converts a vector of input bits (little-endian) to its integer representation
@@ -100,76 +65,26 @@ mod test {
     use super::*;
 
     #[test]
-    fn bytes_to_bits_and_back() {
-        let input = [0u8, 127, 128, 255];
-        let output = bytes_to_bits(&input);
-        let control = bits_to_bytes(&output[..]);
-        assert_eq!(control, input);
+    pub fn test_bytes_to_bits() {
+        let bytes = [1u8, 127];
+        let bits = bytes_to_bits(&bytes);
+        assert_eq!(bits, [
+            true, false, false, false, false, false, false, false, true, true, true, true, true, true, true, false
+        ]);
     }
-    mod checked_uint_to_bits {
-        use std::convert;
 
-        use super::*;
-
-        #[test]
-        fn it_returns_empty_vec_if_bit_count_is_zero() {
-            assert!(checked_uint_to_bits(std::usize::MAX, 0).unwrap().is_empty());
-        }
-
-        #[test]
-        fn it_returns_none_given_too_many_bits() {
-            assert!(checked_uint_to_bits(std::usize::MAX, 1337).is_none());
-        }
-
-        #[test]
-        fn it_returns_bits_for_max_value() {
-            let bits = checked_uint_to_bits(std::usize::MAX, mem::size_of::<usize>() * 8).unwrap();
-            assert!(bits.into_iter().all(convert::identity));
-        }
-
-        #[test]
-        fn shift_left_overflow_bits_to_uint() {
-            const PTR_SIZE_BITS: usize = mem::size_of::<usize>() * 8;
-
-            let bits = [true];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, Some(1));
-
-            let bits = [false, true];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, Some(2));
-
-            let bits = [true, true];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, Some(3));
-
-            let bits = [false; PTR_SIZE_BITS];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, Some(0));
-
-            // lengths greater than the machine ptr size (typically 64bit) would overflow
-            let bits = [false; PTR_SIZE_BITS + 1];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, None);
-
-            let bits = [false; 128];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, None);
-
-            let bits = [
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, true, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                false,
-            ];
-            let result = checked_bits_to_uint(&bits);
-            assert_eq!(result, None);
-        }
+    #[test]
+    pub fn test_checked_bits_to_uint() {
+        let bits = [true, false, false, false, false, false, false, false];
+        let uint = checked_bits_to_uint(&bits).unwrap();
+        assert_eq!(uint, 1);
+        let bits = [
+            true, false, false, false, false, false, false, false, true, false, false, false, false, false, false,
+            false,
+        ];
+        let uint = checked_bits_to_uint(&bits).unwrap();
+        assert_eq!(uint, 257);
+        let bits = [false; mem::size_of::<usize>() * 8 + 1];
+        assert!(checked_bits_to_uint(&bits).is_none());
     }
 }
