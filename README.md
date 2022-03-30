@@ -22,7 +22,7 @@ Function which tries to convert a series of `T`s to `U`s.
 
 A trait that handles base58 encoding and decoding.
 
-## Epoch time
+## epoch_time
 
 Data structure representing time as a `u64`.
 
@@ -30,7 +30,7 @@ Data structure representing time as a `u64`.
 
 A trait allows us to call append_raw_bytes and get the raw bytes of the type.
 
-## Fixed set
+## fixed_set
 
 Data structure describing a fixed set of size _n_.
 

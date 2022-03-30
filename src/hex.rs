@@ -76,6 +76,9 @@ pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Vec<String> {
 /// Decode a hex string into bytes.
 pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     let hex_trim = hex_str.trim();
+    if hex_trim.len() % 2 == 1 {
+        return Err(HexError::LengthError);
+    }
     if !hex_str.is_ascii() {
         return Err(HexError::HexConversionError);
     }
@@ -84,17 +87,10 @@ pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     } else {
         hex_trim
     };
-    if hex_trim.len() % 2 == 1 {
-        return Err(HexError::LengthError);
-    }
     let num_bytes = hex_trim.len() / 2;
     let mut result = vec![0u8; num_bytes];
     for i in 0..num_bytes {
-        let val = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16);
-        result[i] = match val {
-            Ok(v) => v,
-            Err(e) => return Err(HexError::InvalidCharacter(e)),
-        }
+        result[i] = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16).map_err(|e| HexError::InvalidCharacter(e))?;
     }
     Ok(result)
 }
@@ -133,14 +129,18 @@ mod test {
     }
 
     #[test]
+    fn test_to_hex_multiple() {
+        let ba = [vec![16u8, 32], vec![48, 64]];
+        let hexed = to_hex_multiple(&ba);
+        assert_eq!(hexed, ["1020", "3040"]);
+    }
+
+    #[test]
     fn length_error() {
         let result = from_hex("800");
         assert!(result.is_err());
         let err = result.unwrap_err();
-        match err {
-            HexError::LengthError => (),
-            _ => panic!(),
-        }
+        assert!(matches!(err, HexError::LengthError));
         // Check that message is the doc message above
         assert_eq!(err.to_string(), "Hex string lengths must be a multiple of 2");
     }
@@ -150,10 +150,7 @@ mod test {
         let result = from_hex("1234567890ABCDEFG1");
         assert!(result.is_err());
         let err = result.unwrap_err();
-        match &err {
-            HexError::InvalidCharacter(e) => println!("{:?}", e),
-            _ => panic!(),
-        }
+        assert!(matches!(err, HexError::InvalidCharacter(_)));
         assert_eq!(err.to_string(), "Only hexadecimal characters (0-9,a-f) are permitted");
     }
 }
