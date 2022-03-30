@@ -20,7 +20,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//! A trait that handles base58 encoding and decoding.
+//! A trait that handles [base58](https://crates.io/crates/base58-monero) encoding and decoding.
 
 use thiserror::Error;
 

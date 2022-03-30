@@ -32,12 +32,15 @@ use thiserror::Error;
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
 pub trait Hex {
-    /// Try to convert the given hexadecimal string to the type. Any failures (incorrect  string length, non hex
-    /// characters, etc) return a [HexError](enum.HexError.html) with an explanatory note.
+    /// Try to convert the given hexadecimal string to the type.
+    ///
+    /// # Errors
+    /// Any failures (incorrect  string length, non hex characters, etc.) return a [HexError](enum.HexError.html) with
+    /// an explanatory note.
     fn from_hex(hex: &str) -> Result<Self, HexError>
     where Self: Sized;
 
-    /// Return the hexadecimal string representation of the type
+    /// Return the hexadecimal string representation of the type.
     fn to_hex(&self) -> String;
 }
 
@@ -51,7 +54,7 @@ pub enum HexError {
     HexConversionError,
 }
 
-/// Encode the provided bytes into a hex string
+/// Encode the provided bytes into a hex string.
 pub fn to_hex<T>(bytes: &[T]) -> String
 where T: LowerHex {
     let mut s = String::with_capacity(bytes.len() * 2);
@@ -61,7 +64,7 @@ where T: LowerHex {
     s
 }
 
-/// Encode the provided vector of bytes into a hex string
+/// Encode the provided vector of bytes into a hex string.
 pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Vec<String> {
     let mut result = Vec::new();
     for bytes in bytearray {
@@ -96,7 +99,7 @@ pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     Ok(result)
 }
 
-/// Use a serde serializer to serialize the hex string of the given object
+/// Use a serde serializer to serialize the hex string of the given object.
 pub fn serialize_to_hex<S, T>(t: &T, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
