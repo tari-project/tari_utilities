@@ -26,6 +26,7 @@ use thiserror::Error;
 
 use crate::hex::{from_hex, to_hex, Hex, HexError};
 
+/// Errors for [ByteArray] trait.
 #[derive(Debug, Error, PartialEq)]
 pub enum ByteArrayError {
     #[error("Could not create a ByteArray when converting from a different format: {0}")]
@@ -34,7 +35,7 @@ pub enum ByteArrayError {
     IncorrectLength,
 }
 
-/// ByteArray trait the allows converting to/from [array][[u8]]/[vec][[u8]].
+/// Trait the allows converting to/from [array][[u8]]/[vec][[u8]].
 #[allow(clippy::ptr_arg)]
 pub trait ByteArray: Sized {
     /// Return the type as a byte vector.

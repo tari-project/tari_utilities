@@ -24,7 +24,7 @@
 
 use std::convert::TryInto;
 
-/// Tries to convert a series of `T`s to `U`s, returning an error at the first failure
+/// Tries to convert a series of `T`s to `U`s, returning an error at the first failure.
 pub fn try_convert_all<T, U, I>(into_iter: I) -> Result<Vec<U>, T::Error>
 where
     I: IntoIterator<Item = T>,

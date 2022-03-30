@@ -27,6 +27,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json;
 use thiserror::Error;
 
+/// Errors for [MessageFormat] trait.
 #[derive(Debug, Error)]
 pub enum MessageFormatError {
     #[error("An error occurred serialising an object into binary")]
@@ -39,13 +40,20 @@ pub enum MessageFormatError {
     Base64DeserializeError(#[from] base64::DecodeError),
 }
 
+/// Trait for converting to/from binary/json/base64.
 pub trait MessageFormat: Sized {
+    /// Convert to binary.
     fn to_binary(&self) -> Result<Vec<u8>, MessageFormatError>;
+    /// Convert to json.
     fn to_json(&self) -> Result<String, MessageFormatError>;
+    /// Convert to base64.
     fn to_base64(&self) -> Result<String, MessageFormatError>;
 
+    /// Convert from binary.
     fn from_binary(msg: &[u8]) -> Result<Self, MessageFormatError>;
+    /// Convert from json.
     fn from_json(msg: &str) -> Result<Self, MessageFormatError>;
+    /// Convert from base64.
     fn from_base64(msg: &str) -> Result<Self, MessageFormatError>;
 }
 

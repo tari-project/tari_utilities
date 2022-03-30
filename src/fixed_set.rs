@@ -24,6 +24,7 @@
 
 use std::ops::Add;
 
+/// Data structure for fixed set of size _n_.
 #[derive(Clone, Debug)]
 pub struct FixedSet<T> {
     items: Vec<Option<T>>,

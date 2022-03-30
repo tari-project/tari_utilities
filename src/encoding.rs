@@ -26,13 +26,17 @@ use thiserror::Error;
 
 use crate::{ByteArray, ByteArrayError};
 
+/// Trait for encoding/decoding to base58.
 pub trait Base58 {
+    /// Convert from base58 string.
     fn from_base58(hex: &str) -> Result<Self, Base58Error>
     where Self: Sized;
 
+    /// Convert to base58 string.
     fn to_base58(&self) -> String;
 }
 
+/// Errors for trait Base58.
 #[derive(Debug, Error)]
 pub enum Base58Error {
     #[error("Byte array error: {0}")]
