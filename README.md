@@ -50,6 +50,3 @@ Macros for RwLock.
 
 A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
 
-## thread_join
-
-A `ThreadJoinWithTimeout` trait which enables `thread::JoinHandle` to have a timeout join member function.
