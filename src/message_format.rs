@@ -175,43 +175,25 @@ mod test {
 
     #[test]
     fn fail_json() {
-        let err = TestMessage::from_json("{\"key\":5}").err().unwrap();
-        match err {
-            MessageFormatError::JSONError(e) => {
-                assert_eq!(e.line(), 1);
-                assert_eq!(e.column(), 9);
-                assert!(e.is_data());
-            },
-            _ => panic!("JSON conversion should fail"),
-        };
+        let err = TestMessage::from_json("{\"key\":5}").unwrap_err();
+        assert!(matches!(err, MessageFormatError::JSONError(e) if e.line() == 1 && e.column() == 9 && e.is_data()));
     }
 
     #[test]
     fn fail_base64() {
-        let err = TestMessage::from_base64("aaaaa$aaaaa").err().unwrap();
-        match err {
-            MessageFormatError::Base64DeserializeError(Base64Error::InvalidByte(offset, val)) => {
-                assert_eq!(offset, 5);
-                assert_eq!(val, b'$');
-            },
-            _ => panic!("Base64 conversion should fail"),
-        };
+        let err = TestMessage::from_base64("aaaaa$aaaaa").unwrap_err();
+        assert!(matches!(
+            err,
+            MessageFormatError::Base64DeserializeError(Base64Error::InvalidByte(5, b'$'))
+        ));
 
-        let err = TestMessage::from_base64("j6h0b21vcnJvdzKTpXRvZGF5ZMA=").err().unwrap();
-        match err {
-            MessageFormatError::BinaryDeserializeError => {},
-            _ => panic!("Base64 conversion should fail"),
-        };
+        let err = TestMessage::from_base64("j6h0b21vcnJvdzKTpXRvZGF5ZMA=").unwrap_err();
+        assert!(matches!(err, MessageFormatError::BinaryDeserializeError));
     }
 
     #[test]
     fn fail_binary() {
-        let err = TestMessage::from_binary(b"").err().unwrap();
-        match err {
-            MessageFormatError::BinaryDeserializeError => {},
-            _ => {
-                panic!("Binary conversion should fail");
-            },
-        }
+        let err = TestMessage::from_binary(b"").unwrap_err();
+        assert!(matches!(err, MessageFormatError::BinaryDeserializeError));
     }
 }

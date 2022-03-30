@@ -50,7 +50,6 @@ mod test {
 
     #[test]
     fn convert_all_failed() {
-        let err = try_convert_all::<_, u32, _>(vec![std::i64::MAX, 2, 3, 4, 5]).unwrap_err();
-        assert_eq!(err.to_string(), "out of range integral type conversion attempted");
+        assert!(try_convert_all::<_, u32, _>(vec![std::i64::MAX, 2, 3, 4, 5]).is_err());
     }
 }
