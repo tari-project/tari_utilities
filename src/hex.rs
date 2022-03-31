@@ -44,6 +44,7 @@ pub trait Hex {
     fn to_hex(&self) -> String;
 }
 
+/// Errors for [Hex] trait.
 #[derive(Debug, Error)]
 pub enum HexError {
     #[error("Only hexadecimal characters (0-9,a-f) are permitted")]

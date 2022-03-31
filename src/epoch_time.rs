@@ -134,7 +134,7 @@ mod test {
     #[should_panic]
     fn increase_overflow() {
         let a = EpochTime::from(1234);
-        a.increase(u64::MAX);
+        let _ = a.increase(u64::MAX);
     }
 
     #[test]

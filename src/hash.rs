@@ -22,6 +22,7 @@
 
 //! A simple `Hashable` trait which is used to describe how an object should be hashed.
 
+/// Simple Hashable trait with single hash function.
 pub trait Hashable {
     fn hash(&self) -> Vec<u8>;
 }

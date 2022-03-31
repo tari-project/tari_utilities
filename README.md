@@ -1,5 +1,7 @@
 # Tari Utilities
 
+![](https://github.com/tari-project/tari_utilities/workflows/Security%20audit/badge.svg)
+![](https://github.com/tari-project/tari_utilities/workflows/Clippy/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/tari-project/tari_utilities/badge.svg)](https://coveralls.io/github/tari-project/tari_utilities)
 
 This crate is part of the [Tari Cryptocurrency](https://tari.com) project.
