@@ -5,6 +5,7 @@ name: Test
 jobs:
   clippy:
     name: clippy
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v2
