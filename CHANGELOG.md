@@ -1,5 +1,21 @@
 # Changelog
 
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.4.0](https://github.com/tari-project/tari_utilities/compare/v0.3.1...v0.4.0) (2022-04-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove chrono dependency, remove extend bytes (#25)
+
+### Features
+
+* uses standard version ([#29](https://github.com/tari-project/tari_utilities/issues/29)) ([7e0c6a0](https://github.com/tari-project/tari_utilities/commit/7e0c6a08b233be21709cba0436b1eff090c14f4a))
+
+
+* remove chrono dependency, remove extend bytes ([#25](https://github.com/tari-project/tari_utilities/issues/25)) ([dbafd78](https://github.com/tari-project/tari_utilities/commit/dbafd7827896db3365c5a13e6823c96e4c941ef6)), closes [tari-project/tari-crypto#64](https://github.com/tari-project/tari-crypto/issues/64)
+
 ### [0.3.1](https://github.com/tari-project/tari_utilities/compare/v0.3.0...v0.3.1) (2022-03-11)
 
 
