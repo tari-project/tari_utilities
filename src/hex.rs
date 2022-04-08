@@ -91,7 +91,7 @@ pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     let num_bytes = hex_trim.len() / 2;
     let mut result = vec![0u8; num_bytes];
     for i in 0..num_bytes {
-        result[i] = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16).map_err(|e| HexError::InvalidCharacter(e))?;
+        result[i] = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16).map_err(HexError::InvalidCharacter)?;
     }
     Ok(result)
 }

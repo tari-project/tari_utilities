@@ -1,0 +1,3 @@
+[toolchain]
+#nightly-2022-01-17
+channel="stable"
