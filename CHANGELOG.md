@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.2](https://github.com/tari-project/tari_utilities/compare/v0.4.1...v0.4.2) (2022-04-12)
+
+
+### Bug Fixes
+
+* reduce min serde version ([dbbbca0](https://github.com/tari-project/tari_utilities/commit/dbbbca0f2de3c6b1c1bef71eafa29de857c0a1a8))
+
 ### [0.4.1](https://github.com/tari-project/tari_utilities/compare/v0.4.0...v0.4.1) (2022-04-12)
 
 * remove unused dependencies
