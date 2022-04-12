@@ -29,6 +29,7 @@ use thiserror::Error;
 
 /// Errors for [MessageFormat] trait.
 #[derive(Debug, Error)]
+#[allow(missing_docs)]
 pub enum MessageFormatError {
     #[error("An error occurred serialising an object into binary")]
     BinarySerializeError,

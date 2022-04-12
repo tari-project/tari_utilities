@@ -38,6 +38,7 @@ pub trait Base58 {
 
 /// Errors for trait Base58.
 #[derive(Debug, Error)]
+#[allow(missing_docs)]
 pub enum Base58Error {
     #[error("Byte array error: {0}")]
     ByteArrayError(#[from] ByteArrayError),

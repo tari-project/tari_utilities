@@ -24,5 +24,6 @@
 
 /// Simple Hashable trait with single hash function.
 pub trait Hashable {
+    /// Create a hash from this object
     fn hash(&self) -> Vec<u8>;
 }

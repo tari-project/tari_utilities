@@ -28,6 +28,7 @@ use crate::hex::{from_hex, to_hex, Hex, HexError};
 
 /// Errors for [ByteArray] trait.
 #[derive(Debug, Error, PartialEq)]
+#[allow(missing_docs)]
 pub enum ByteArrayError {
     #[error("Could not create a ByteArray when converting from a different format: {0}")]
     ConversionError(String),
