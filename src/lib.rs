@@ -32,8 +32,10 @@ pub mod hex;
 #[macro_use]
 pub mod locks;
 pub mod message_format;
+pub mod hidden;
 
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
     hash::Hashable,
+    hidden::Hidden,
 };

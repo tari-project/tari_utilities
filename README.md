@@ -52,3 +52,6 @@ Macros for RwLock.
 
 A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
 
+## Hidden
+
+A wrapper type for concealing sensitive information in logs.
