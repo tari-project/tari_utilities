@@ -3,6 +3,7 @@ use std::ops::DerefMut;
 use serde::{Serialize, Deserialize};
 
 #[derive(Copy, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Hidden<T> {
     inner: T,
 }
@@ -45,7 +46,7 @@ impl<T> DerefMut for Hidden<T> {
     }
 }
 
-impl<T: std::cmp::PartialEq> PartialEq for Hidden<T> {
+impl<T: PartialEq> PartialEq for Hidden<T> {
     fn eq(&self, other: &Self) -> bool {
         self.inner == other.inner
     }
