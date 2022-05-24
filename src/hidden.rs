@@ -22,9 +22,9 @@
 
 //! A wrapper to conceal secrets when output into logs or displayed.
 
+use std::{fmt, ops::DerefMut};
+
 use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::ops::DerefMut;
 
 /// A simple struct with a single inner value to wrap content of any type.
 #[derive(Copy, Clone, Serialize, Deserialize)]
