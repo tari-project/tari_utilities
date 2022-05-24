@@ -33,8 +33,8 @@ pub struct Hidden<T> {
     inner: T,
 }
 
-/// Returns ownership of the inner value discarding the wrapper.
 impl<T> Hidden<T> {
+    /// Returns ownership of the inner value discarding the wrapper.
     pub fn into_inner(self) -> T {
         self.inner
     }
