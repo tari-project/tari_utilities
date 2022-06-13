@@ -81,12 +81,12 @@ impl ByteArray for Vec<u8> {
     }
 }
 
-impl ByteArray for [u8; 32] {
+impl<const I: usize> ByteArray for [u8; I] {
     fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
-        if bytes.len() != 32 {
+        if bytes.len() != I {
             return Err(ByteArrayError::IncorrectLength);
         }
-        let mut a = [0u8; 32];
+        let mut a = [0u8; I];
         a.copy_from_slice(bytes);
         Ok(a)
     }
@@ -126,6 +126,20 @@ mod test {
         ];
         let ba = <[u8; 32]>::from_vec(&v).unwrap();
         assert_eq!(ba.to_vec(), v);
+    }
+
+    #[test]
+    fn from_to_different_sizes() {
+        let v4 = vec![0u8, 1, 2, 3];
+        let a4 = <[u8; 4]>::from_vec(&v4).unwrap();
+        assert_eq!(a4.to_vec(), v4);
+        let v10 = vec![0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let a10 = <[u8; 10]>::from_vec(&v10).unwrap();
+        assert_eq!(a10.to_vec(), v10);
+        fn check(_: impl ByteArray) {}
+        check([0; 32]);
+        check([0; 64]);
+        check([0; 1000]);
     }
 
     #[test]
