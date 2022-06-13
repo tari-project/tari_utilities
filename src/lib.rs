@@ -33,6 +33,7 @@ pub mod hex;
 pub mod locks;
 pub mod hidden;
 pub mod message_format;
+pub mod serde;
 
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
