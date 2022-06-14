@@ -20,6 +20,11 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! A module for smart bytes serialization.
+//!
+//! It stores bytes as hex for human readable formats and
+//! uses bytes for binary formats.
+
 use std::{fmt, marker::PhantomData};
 
 use serde::{
@@ -33,6 +38,7 @@ use crate::{
     hex::{from_hex, Hex},
 };
 
+/// Serializes a [`ByteArray`] to a hex string or a binary array.
 pub fn serialize<S, T>(data: &T, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -45,6 +51,7 @@ where
     }
 }
 
+/// Serializes a [`ByteArray`] from a hex string or a binary array.
 pub fn deserialize<'de, D, T>(de: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
