@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.4](https://github.com/tari-project/tari_utilities/compare/v0.4.3...v0.4.4) (2022-06-14)
+
+
+### Features
+
+* added `hex` module with a serializer and deserializer [94c1452](https://github.com/tari-project/tari_utilities/commit/94c1452c64bebc74733c43c92cd9b4fb3651ab02)
+* `ByteArray` trait is implemented for byte arrays of all sizes [7f424dd](https://github.com/tari-project/tari_utilities/commit/7f424ddbc234b62f1564cc91e79692a095d32463)
+* added `Hidden` wrapper [f1010ba](https://github.com/tari-project/tari_utilities/commit/f1010bab437c74941d0680b21d6f95fd9d10cc8c)
+
 ### [0.4.3](https://github.com/tari-project/tari_utilities/compare/v0.4.2...v0.4.3) (2022-04-29)
 
 
