@@ -22,8 +22,11 @@
 
 use crate::byte_array::ByteArray;
 use crate::hex::{from_hex, Hex};
+use serde::{
+    de::{Error, Visitor},
+    Deserializer, Serializer,
+};
 use std::{fmt, marker::PhantomData};
-use serde::{de::{Error, Visitor}, Deserializer, Serializer};
 
 pub fn serialize<S, T>(data: &T, ser: S) -> Result<S::Ok, S::Error>
 where
@@ -61,7 +64,8 @@ impl<T> Default for HexVisitor<T> {
 }
 
 impl<'de, T> Visitor<'de> for HexVisitor<T>
-where T: ByteArray
+where
+    T: ByteArray,
 {
     type Value = T;
 
@@ -70,23 +74,60 @@ where T: ByteArray
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-    where E: Error {
+    where
+        E: Error,
+    {
         let bytes = from_hex(v).map_err(|e| E::custom(e.to_string()))?;
         self.visit_bytes(&bytes)
     }
 
     fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-    where E: Error {
+    where
+        E: Error,
+    {
         self.visit_str(&v)
     }
 
     fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
-    where E: Error {
+    where
+        E: Error,
+    {
         T::from_bytes(v).map_err(|e| E::custom(e.to_string()))
     }
 
     fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
-    where E: Error {
+    where
+        E: Error,
+    {
         self.visit_bytes(v)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde::{Deserialize, Serialize};
+    use std::io::Write;
+
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+    struct HexOrBytes(#[serde(with = "super")] [u8; 4]);
+
+    #[test]
+    fn check_serde_hex_human_readable() {
+        let hex_or_bytes = HexOrBytes([1, 2, 3, 255]);
+        let expected = "\"010203ff\"";
+        assert_eq!(serde_json::to_string(&hex_or_bytes).unwrap(), expected);
+        let restored: HexOrBytes = serde_json::from_str(&expected).unwrap();
+        assert_eq!(hex_or_bytes, restored);
+    }
+
+    #[test]
+    fn check_serde_hex_binary() {
+        let hex_or_bytes = HexOrBytes([1, 2, 3, 255]);
+        let mut expected: Vec<u8> = Vec::new();
+        expected.write_all(&(&hex_or_bytes.0).len().to_le_bytes()).unwrap();
+        expected.write_all(&[1, 2, 3, 255]).unwrap();
+        assert_eq!(bincode::serialize(&hex_or_bytes).unwrap(), expected);
+        let restored: HexOrBytes = bincode::deserialize(&expected).unwrap();
+        assert_eq!(hex_or_bytes, restored);
     }
 }
