@@ -20,13 +20,18 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use crate::byte_array::ByteArray;
-use crate::hex::{from_hex, Hex};
+use std::{fmt, marker::PhantomData};
+
 use serde::{
     de::{Error, Visitor},
-    Deserializer, Serializer,
+    Deserializer,
+    Serializer,
 };
-use std::{fmt, marker::PhantomData};
+
+use crate::{
+    byte_array::ByteArray,
+    hex::{from_hex, Hex},
+};
 
 pub fn serialize<S, T>(data: &T, ser: S) -> Result<S::Ok, S::Error>
 where
@@ -64,8 +69,7 @@ impl<T> Default for HexVisitor<T> {
 }
 
 impl<'de, T> Visitor<'de> for HexVisitor<T>
-where
-    T: ByteArray,
+where T: ByteArray
 {
     type Value = T;
 
@@ -74,39 +78,32 @@ where
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
+    where E: Error {
         let bytes = from_hex(v).map_err(|e| E::custom(e.to_string()))?;
         self.visit_bytes(&bytes)
     }
 
     fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
+    where E: Error {
         self.visit_str(&v)
     }
 
     fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
+    where E: Error {
         T::from_bytes(v).map_err(|e| E::custom(e.to_string()))
     }
 
     fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
+    where E: Error {
         self.visit_bytes(v)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use serde::{Deserialize, Serialize};
     use std::io::Write;
+
+    use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
     struct HexOrBytes(#[serde(with = "super")] [u8; 4]);
