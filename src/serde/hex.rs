@@ -36,7 +36,7 @@ where
     if ser.is_human_readable() {
         ser.serialize_str(&data.to_hex())
     } else {
-        ser.serialize_bytes(&data.as_bytes())
+        ser.serialize_bytes(data.as_bytes())
     }
 }
 
