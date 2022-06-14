@@ -27,11 +27,12 @@ use thiserror::Error;
 use crate::hex::{from_hex, to_hex, Hex, HexError};
 
 /// Errors for [ByteArray] trait.
-#[derive(Debug, Error, PartialEq)]
-#[allow(missing_docs)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ByteArrayError {
+    /// An array can't be parsed.
     #[error("Could not create a ByteArray when converting from a different format: {0}")]
     ConversionError(String),
+    /// The lenght doesn't fit to the array.
     #[error("The input data was the incorrect length to perform the desired conversion")]
     IncorrectLength,
 }

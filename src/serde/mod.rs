@@ -1,4 +1,4 @@
-// Copyright 2019 The Tari Project
+// Copyright 2022 The Tari Project
 //
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 // following conditions are met:
@@ -20,25 +20,6 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#![deny(missing_docs)]
+//! A module with serialization utilities.
 
-//! A set of useful and commonly used utilities that are used in several places in the Tari project.
-pub mod bit;
-pub mod byte_array;
-pub mod convert;
-pub mod encoding;
-pub mod epoch_time;
-pub mod fixed_set;
-pub mod hash;
 pub mod hex;
-#[macro_use]
-pub mod locks;
-pub mod hidden;
-pub mod message_format;
-pub mod serde;
-
-pub use self::{
-    byte_array::{ByteArray, ByteArrayError},
-    hash::Hashable,
-    hidden::Hidden,
-};
