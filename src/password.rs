@@ -9,13 +9,13 @@ use crate::Hidden;
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(transparent)]
 pub struct SafePassword {
-    password: Hidden<String>,
+    password: Hidden<Box<[u8]>>,
 }
 
 impl From<String> for SafePassword {
     fn from(s: String) -> Self {
         Self {
-            password: Hidden::from(s),
+            password: Hidden::from(s.into_bytes().into_boxed_slice()),
         }
     }
 }
@@ -42,15 +42,13 @@ impl FromStr for SafePassword {
     type Err = PasswordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            password: Hidden::from(s.to_owned()),
-        })
+        Ok(Self::from(s.to_owned()))
     }
 }
 
 impl SafePassword {
     /// Gets a reference to bytes of a passphrase.
     pub fn reveal(&self) -> &[u8] {
-        self.password.as_bytes()
+        self.password.as_ref()
     }
 }
