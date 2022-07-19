@@ -1,3 +1,5 @@
+//! A module with a safe password wrapper.
+
 use std::{error::Error, fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};

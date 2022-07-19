@@ -120,7 +120,7 @@ mod tests {
         let hex_or_bytes = HexOrBytes([1, 2, 3, 255]);
         let expected = "\"010203ff\"";
         assert_eq!(serde_json::to_string(&hex_or_bytes).unwrap(), expected);
-        let restored: HexOrBytes = serde_json::from_str(&expected).unwrap();
+        let restored: HexOrBytes = serde_json::from_str(expected).unwrap();
         assert_eq!(hex_or_bytes, restored);
     }
 
