@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.5](https://github.com/tari-project/tari_utilities/compare/v0.4.4...v0.4.5) (2022-07-26)
+
+
+### Features
+
+* add SafePassword struct ([#46](https://github.com/tari-project/tari_utilities/issues/46)) ([ae01aeb](https://github.com/tari-project/tari_utilities/commit/ae01aeb27317575cd7066ed8591a4b9c93bac524))
+
 ### [0.4.4](https://github.com/tari-project/tari_utilities/compare/v0.4.3...v0.4.4) (2022-06-14)
 
 
