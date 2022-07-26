@@ -81,6 +81,8 @@ impl<T: PartialEq> PartialEq for Hidden<T> {
     }
 }
 
+impl<T: Eq> Eq for Hidden<T> {}
+
 #[cfg(test)]
 mod test {
     use super::*;
