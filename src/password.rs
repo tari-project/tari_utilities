@@ -14,10 +14,10 @@ pub struct SafePassword {
     password: Hidden<Box<[u8]>>,
 }
 
-impl From<String> for SafePassword {
-    fn from(s: String) -> Self {
+impl<S: Into<String>> From<S> for SafePassword {
+    fn from(s: S) -> Self {
         Self {
-            password: Hidden::from(s.into_bytes().into_boxed_slice()),
+            password: Hidden::from(s.into().into_bytes().into_boxed_slice()),
         }
     }
 }
@@ -52,5 +52,18 @@ impl SafePassword {
     /// Gets a reference to bytes of a passphrase.
     pub fn reveal(&self) -> &[u8] {
         self.password.as_ref()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::SafePassword;
+
+    #[test]
+    fn test_password() {
+        assert_eq!(
+            SafePassword::from("secret_must_match".to_string()),
+            SafePassword::from("secret_must_match")
+        );
     }
 }
