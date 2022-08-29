@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.6](https://github.com/tari-project/tari_utilities/compare/v0.4.5...v0.4.6) (2022-08-29)
+
+
+### Bug Fixes
+
+* a slightly changed signature of `impl From<String> for SafePassword` to be a bit more generic ([#47](https://github.com/tari-project/tari_utilities/issues/47)) ([3fba4df](https://github.com/tari-project/tari_utilities/commit/3fba4dfd441bd3df42b2fdb0e9e1db04daab6441))
+
 ### [0.4.5](https://github.com/tari-project/tari_utilities/compare/v0.4.4...v0.4.5) (2022-07-26)
 
 
