@@ -24,7 +24,7 @@ impl<S: Into<String>> From<S> for SafePassword {
 
 impl Drop for SafePassword {
     fn drop(&mut self) {
-        self.password.zeroize();
+        self.password.reveal_mut().zeroize();
     }
 }
 
@@ -51,7 +51,7 @@ impl FromStr for SafePassword {
 impl SafePassword {
     /// Gets a reference to bytes of a passphrase.
     pub fn reveal(&self) -> &[u8] {
-        self.password.as_ref()
+        self.password.reveal()
     }
 }
 
