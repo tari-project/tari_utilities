@@ -27,13 +27,17 @@ use std::{fmt, ops::DerefMut};
 use serde::{Deserialize, Serialize};
 
 /// A simple struct with a single inner value to wrap content of any type.
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize, Default)]
 #[serde(transparent)]
 pub struct Hidden<T> {
     inner: T,
 }
 
 impl<T> Hidden<T> {
+    pub fn hide(inner: T) -> Self {
+        Self { inner }
+    }
+
     /// Returns ownership of the inner value discarding the wrapper.
     pub fn into_inner(self) -> T {
         self.inner
@@ -42,7 +46,7 @@ impl<T> Hidden<T> {
 
 impl<T> From<T> for Hidden<T> {
     fn from(inner: T) -> Self {
-        Hidden { inner }
+        Self::hide(inner)
     }
 }
 
