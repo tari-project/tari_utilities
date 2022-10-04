@@ -82,7 +82,7 @@ mod test {
     #[test]
     fn into_applies_wrapper_deref_removes_it() {
         let wrapped: Hidden<u8> = Hidden::hide(42);
-        assert_eq!(42, *wrapped);
+        assert_eq!(42, *wrapped.reveal());
     }
 
     #[test]
