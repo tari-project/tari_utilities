@@ -22,27 +22,42 @@
 
 //! A wrapper to conceal secrets when output into logs or displayed.
 
-use std::{fmt, ops::DerefMut};
+use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
 /// A simple struct with a single inner value to wrap content of any type.
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[serde(transparent)]
 pub struct Hidden<T> {
     inner: T,
 }
 
 impl<T> Hidden<T> {
+    /// Hides a value.
+    pub fn hide(inner: T) -> Self {
+        Self { inner }
+    }
+
     /// Returns ownership of the inner value discarding the wrapper.
     pub fn into_inner(self) -> T {
         self.inner
+    }
+
+    /// Provides access to the inner value (immutable).
+    pub fn reveal(&self) -> &T {
+        &self.inner
+    }
+
+    /// Provides access to the inner value (mutable).
+    pub fn reveal_mut(&mut self) -> &mut T {
+        &mut self.inner
     }
 }
 
 impl<T> From<T> for Hidden<T> {
     fn from(inner: T) -> Self {
-        Hidden { inner }
+        Self::hide(inner)
     }
 }
 
@@ -60,36 +75,19 @@ impl<T> fmt::Display for Hidden<T> {
     }
 }
 
-/// Attempts to make the wrapper more transparent by having deref return a reference to the inner value.
-impl<T> std::ops::Deref for Hidden<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-
-impl<T> DerefMut for Hidden<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
-
-impl<T: PartialEq> PartialEq for Hidden<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.inner == other.inner
-    }
-}
-
-impl<T: Eq> Eq for Hidden<T> {}
-
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
     fn into_applies_wrapper_deref_removes_it() {
-        let wrapped: Hidden<u8> = 42.into();
-        assert_eq!(42, *wrapped)
+        let wrapped: Hidden<u8> = Hidden::hide(42);
+        assert_eq!(42, *wrapped.reveal());
+    }
+
+    #[test]
+    fn hidden_value_derived_trats() {
+        let wrapped: Hidden<u8> = 0.into();
+        assert_eq!(wrapped, Hidden::default());
     }
 }
