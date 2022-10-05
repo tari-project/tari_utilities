@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/tari-project/tari_utilities/compare/v0.4.7...v0.4.8) (2022-10-05)
+
+
+### Features
+
+* add reveal method to Hidden ([#49](https://github.com/tari-project/tari_utilities/issues/49)) ([ee84d4f](https://github.com/tari-project/tari_utilities/commit/ee84d4fd9faa0ca21c9ec5e059612fc7aa106059))
+
 ### [0.4.7](https://github.com/tari-project/tari_utilities/compare/v0.4.6...v0.4.7) (2022-10-03)
 
 ### [0.4.6](https://github.com/tari-project/tari_utilities/compare/v0.4.5...v0.4.6) (2022-08-29)
