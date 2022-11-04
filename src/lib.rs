@@ -23,6 +23,7 @@
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
 pub mod bit;
 pub mod byte_array;
+pub mod byte_counter;
 pub mod convert;
 pub mod encoding;
 pub mod epoch_time;
