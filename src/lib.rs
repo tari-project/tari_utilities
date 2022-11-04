@@ -30,6 +30,7 @@ pub mod epoch_time;
 pub mod fixed_set;
 pub mod hash;
 pub mod hex;
+pub mod limited_reader;
 #[macro_use]
 pub mod locks;
 pub mod hidden;
