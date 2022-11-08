@@ -1,4 +1,4 @@
-// Copyright 2020. The Tari Project
+// Copyright 2022. The Tari Project
 //
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 // following conditions are met:
@@ -20,74 +20,108 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//! A wrapper to conceal secrets when output into logs or displayed.
+//! A generic type that hides data from being displayed or written, keeps it on the heap, zeroizes it when it goes away,
+//! limits access, and allows for type enforcement.
 
-use std::fmt;
+use std::{any::type_name, fmt, marker::PhantomData};
 
 use serde::{Deserialize, Serialize};
+use zeroize::Zeroize;
 
-/// A simple struct with a single inner value to wrap content of any type.
-#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[serde(transparent)]
-pub struct Hidden<T> {
-    inner: T,
+/// A marker trait for labeling different hidden types
+pub trait HiddenLabel {}
+
+/// Create a hidden type label
+#[macro_export]
+macro_rules! hidden_label {
+    ($name:ident) => {
+        #[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+        pub struct $name;
+
+        impl HiddenLabel for $name {}
+    };
 }
 
-impl<T> Hidden<T> {
-    /// Hides a value.
+// A default hidden type label; only use this if you're absolutely sure you don't care about type enforcement
+hidden_label!(DefaultHiddenLabel);
+
+/// Data that needs to be kept hidden, needs to be zeroized when it goes away, and is resistant to misuse
+#[derive(Clone, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(transparent)]
+pub struct Hidden<T, L = DefaultHiddenLabel>
+where
+    T: Zeroize,
+    L: HiddenLabel,
+{
+    inner: Box<T>,
+    #[serde(skip)]
+    _type: PhantomData<L>,
+}
+
+impl<T, L> Hidden<T, L>
+where
+    T: Zeroize,
+    L: HiddenLabel,
+{
+    /// Hide the data
     pub fn hide(inner: T) -> Self {
-        Self { inner }
+        Self {
+            inner: Box::new(inner),
+            _type: PhantomData,
+        }
     }
 
-    /// Returns ownership of the inner value discarding the wrapper.
-    pub fn into_inner(self) -> T {
-        self.inner
-    }
-
-    /// Provides access to the inner value (immutable).
+    /// Reveal the hidden data as an immutable reference
     pub fn reveal(&self) -> &T {
         &self.inner
     }
 
-    /// Provides access to the inner value (mutable).
+    /// Reveal the hidden data as a mutable reference
     pub fn reveal_mut(&mut self) -> &mut T {
         &mut self.inner
     }
 }
 
-impl<T> From<T> for Hidden<T> {
-    fn from(inner: T) -> Self {
-        Self::hide(inner)
-    }
-}
-
-/// Defines a masked value for the type to output as debug information. Concealing the secrets within.
-impl<T> fmt::Debug for Hidden<T> {
+/// Only output masked data for debugging
+impl<T, L> fmt::Debug for Hidden<T, L>
+where
+    T: Zeroize,
+    L: HiddenLabel,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Hidden<{}>", std::any::type_name::<T>())
+        write!(f, "Hidden<{}, {}>", type_name::<T>(), type_name::<L>(),)
     }
 }
 
-/// Defines a masked value for the type to display. Concealing the secrets within.
-impl<T> fmt::Display for Hidden<T> {
+/// Only display masked data
+impl<T, L> fmt::Display for Hidden<T, L>
+where
+    T: Zeroize,
+    L: HiddenLabel,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Hidden<{}>", std::any::type_name::<T>())
+        write!(f, "Hidden<{}, {}>", type_name::<T>(), type_name::<L>(),)
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn into_applies_wrapper_deref_removes_it() {
-        let wrapped: Hidden<u8> = Hidden::hide(42);
-        assert_eq!(42, *wrapped.reveal());
+/// Zeroize the hidden data
+impl<T, L> Zeroize for Hidden<T, L>
+where
+    T: Zeroize,
+    L: HiddenLabel,
+{
+    fn zeroize(&mut self) {
+        self.inner.zeroize();
     }
+}
 
-    #[test]
-    fn hidden_value_derived_trats() {
-        let wrapped: Hidden<u8> = 0.into();
-        assert_eq!(wrapped, Hidden::default());
+/// Zeroize the hidden data when dropped
+impl<T, L> Drop for Hidden<T, L>
+where
+    T: Zeroize,
+    L: HiddenLabel,
+{
+    fn drop(&mut self) {
+        self.zeroize();
     }
 }
