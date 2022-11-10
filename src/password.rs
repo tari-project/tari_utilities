@@ -28,12 +28,12 @@ impl FromStr for SafePassword {
     type Err = PasswordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::hide(s.as_bytes().to_vec()))
+        Ok(Self::hide(<&str as Into<String>>::into(s).into_bytes()))
     }
 }
 
 impl<S: Into<String>> From<S> for SafePassword {
     fn from(s: S) -> Self {
-        Self::hide(s.into().as_bytes().to_vec())
+        Self::hide(s.into().into_bytes())
     }
 }
