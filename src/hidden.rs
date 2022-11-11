@@ -55,6 +55,7 @@ pub trait HiddenLabel {}
 #[macro_export]
 macro_rules! hidden_label {
     ($name:ident) => {
+        /// A hidden type label
         #[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
         pub struct $name;
 

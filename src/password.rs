@@ -16,7 +16,7 @@ hidden_label!(SafePasswordLabel);
 /// It is converted to a byte array, which can be accessed as a mutable or immutable reference.
 ///
 /// ```edition2018
-/// # use tari_utilities::SafePassword
+/// # use tari_utilities::SafePassword;
 ///
 /// // Create a safe passphrase
 /// let passphrase = SafePassword::from("my secret passphrase");
@@ -24,7 +24,7 @@ hidden_label!(SafePasswordLabel);
 /// // We can also use a string directly
 /// assert_eq!(
 ///     passphrase.reveal(),
-///     SafePassword::from("my secret passphrase".to_string())
+///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
 pub type SafePassword = Hidden<Vec<u8>, SafePasswordLabel>;
