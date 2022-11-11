@@ -16,7 +16,7 @@ jobs:
       - name: Download Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-01-08
+          toolchain: nightly
           override: true
           components: llvm-tools-preview
       - name: Install llvm-tools
@@ -27,7 +27,7 @@ jobs:
       - name: Run test coverage
         id: coverage
         env:
-          SKIP_HTML: '1'
+          SKIP_HTML: "1"
         run: |
           /bin/bash -c ./test_coverage.sh
       - name: Coveralls upload
