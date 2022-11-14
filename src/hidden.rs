@@ -124,15 +124,15 @@ hidden_label!(DefaultHiddenLabel);
 /// hidden_label!(KeyForCipherBLabel);
 ///
 /// // Both ciphers have keys that are `[u8; 32]` under the hood
-/// type KeyForCipherA = Hidden<[u8; 32], KeyForCipherALabel);
-/// type KeyForCipherB = Hidden<[u8; 32], KeyForCipherBLabel);
+/// type KeyForCipherA = Hidden<[u8; 32], KeyForCipherALabel>;
+/// type KeyForCipherB = Hidden<[u8; 32], KeyForCipherBLabel>;
 ///
 /// // Create a key for each cipher; notice the underlying data is the same for both
 /// let key_a = KeyForCipherA::hide([1u8; 32]);
-/// let key_b = KeyForCipherA::hide([1u8; 32]);
+/// let key_b = KeyForCipherB::hide([1u8; 32]);
 ///
 /// // The compiler won't let us treat them the same; this won't build
-/// assert_eq!(key_a.reveal(), key_b.reveal());
+/// assert_eq!(key_a, key_b);
 /// ```
 ///
 /// But if you choose not to use a label, you can mix and match hidden types. Be careful if you do this!
@@ -150,7 +150,7 @@ hidden_label!(DefaultHiddenLabel);
 /// let b = TypeB::default();
 ///
 /// // You can mix and match these! Be sure that's what you actually intended.
-/// assert_eq!(a.reveal(), b.reveal());
+/// assert_eq!(a, b);
 /// ```
 #[derive(Clone, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(transparent)]
