@@ -24,7 +24,7 @@ use zeroize::Zeroize;
 ///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
-#[derive(Debug, Deserialize, Eq, PartialEq, Serialize, Zeroize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize, Zeroize)]
 #[serde(transparent)]
 pub struct SafePassword {
     passphrase: Hidden<Vec<u8>>,
