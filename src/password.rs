@@ -3,6 +3,7 @@
 use std::{error::Error, fmt::Display, str::FromStr};
 
 use crate::hidden::Hidden;
+use serde::{Deserialize, Serialize};
 use zeroize::Zeroize;
 
 /// A representation of a passphrase that zeroizes on drop, prevents display and debug output, and limits access to
@@ -23,7 +24,8 @@ use zeroize::Zeroize;
 ///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
-#[derive(Debug, Eq, PartialEq, Zeroize)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize, Zeroize)]
+#[serde(transparent)]
 pub struct SafePassword {
     passphrase: Hidden<Vec<u8>>,
 }

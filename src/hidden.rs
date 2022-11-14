@@ -37,6 +37,7 @@ use zeroize::Zeroize;
 ///
 /// ```edition2018
 /// # #[macro_use] extern crate tari_utilities;
+/// # use serde::{Deserialize, Serialize};
 /// # use tari_utilities::Hidden;
 /// # use zeroize::Zeroize;
 /// # fn main() {
@@ -49,7 +50,8 @@ use zeroize::Zeroize;
 macro_rules! hidden_type {
     ($name:ident, $type:ty) => {
         /// A hidden type
-        #[derive(Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Zeroize)]
+        #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize, Zeroize)]
+        #[serde(transparent)]
         pub struct $name
         where
             $type: Default + Zeroize,
