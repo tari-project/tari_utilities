@@ -2,12 +2,8 @@
 
 use std::{error::Error, fmt::Display, str::FromStr};
 
-use crate::{
-    hidden::{Hidden, HiddenLabel},
-    hidden_label,
-};
-
-hidden_label!(SafePasswordLabel);
+use crate::hidden::Hidden;
+use zeroize::Zeroize;
 
 /// A representation of a passphrase that zeroizes on drop, prevents display and debug output, and limits access to
 /// references
@@ -27,7 +23,22 @@ hidden_label!(SafePasswordLabel);
 ///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
-pub type SafePassword = Hidden<Vec<u8>, SafePasswordLabel>;
+#[derive(Debug, Eq, PartialEq, Zeroize)]
+pub struct SafePassword {
+    passphrase: Hidden<Vec<u8>>,
+}
+
+impl SafePassword {
+    /// Get an immutable reference to the passphrase
+    pub fn reveal(&self) -> &Vec<u8> {
+        self.passphrase.reveal()
+    }
+
+    /// Get a mutable reference to the passphrase
+    pub fn reveal_mut(&mut self) -> &mut Vec<u8> {
+        self.passphrase.reveal_mut()
+    }
+}
 
 /// An error for parsing a password from a string
 #[derive(Debug)]
@@ -45,13 +56,13 @@ impl FromStr for SafePassword {
     type Err = PasswordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::hide(<&str as Into<String>>::into(s).into_bytes()))
+        Ok(Self { passphrase: Hidden::<Vec<u8>>::hide(<&str as Into<String>>::into(s).into_bytes()) })
     }
 }
 
 impl<S: Into<String>> From<S> for SafePassword {
     fn from(s: S) -> Self {
-        Self::hide(s.into().into_bytes())
+        Self { passphrase: Hidden::<Vec<u8>>::hide(s.into().into_bytes()) }
     }
 }
 
@@ -70,6 +81,8 @@ mod tests {
         let from_string_ref = SafePassword::from(password);
 
         assert_eq!(from_str, from_string);
+        assert_eq!(from_str.reveal(), from_string.reveal());
         assert_eq!(from_string, from_string_ref);
+        assert_eq!(from_string.reveal(), from_string_ref.reveal());
     }
 }
