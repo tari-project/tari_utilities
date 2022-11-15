@@ -54,7 +54,7 @@ macro_rules! hidden_type {
         #[serde(transparent)]
         pub struct $name
         where
-            $type: Default + Zeroize,
+            $type: Zeroize,
         {
             data: Hidden<$type>,
         }
@@ -70,6 +70,12 @@ macro_rules! hidden_type {
             #[allow(dead_code)]
             pub fn reveal_mut(&mut self) -> &mut $type {
                 self.data.reveal_mut()
+            }
+        }
+
+        impl From<$type> for $name {
+            fn from(t: $type) -> Self {
+                Self { data: Hidden::hide(t) }
             }
         }
     };
