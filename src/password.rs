@@ -4,7 +4,6 @@ use std::{error::Error, fmt::Display, str::FromStr};
 
 use crate::hidden::Hidden;
 use serde::{Deserialize, Serialize};
-use zeroize::Zeroize;
 
 /// A representation of a passphrase that zeroizes on drop, prevents display and debug output, and limits access to
 /// references
@@ -24,7 +23,7 @@ use zeroize::Zeroize;
 ///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
-#[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize, Zeroize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct SafePassword {
     passphrase: Hidden<Vec<u8>>,
@@ -82,9 +81,18 @@ mod tests {
         let from_string = SafePassword::from(password.to_string());
         let from_string_ref = SafePassword::from(password);
 
-        assert_eq!(from_str, from_string);
         assert_eq!(from_str.reveal(), from_string.reveal());
-        assert_eq!(from_string, from_string_ref);
         assert_eq!(from_string.reveal(), from_string_ref.reveal());
+    }
+
+    #[test]
+    fn serialize() {
+        let password = "password";
+
+        let hidden = SafePassword::from(password);
+        let ser = serde_json::to_string(&hidden).unwrap();
+
+        let deser: SafePassword = serde_json::from_str(&ser).unwrap();
+        assert_eq!(hidden.reveal(), deser.reveal());
     }
 }

@@ -31,30 +31,51 @@ use std::{any::type_name, fmt};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroize;
 
-/// This is a macro that produces a hidden type.
-/// You can use it to generate multiple hidden types that can't be unintentionally mixed up in things like function
-/// definitions.
-///
+/// This is a macro that produces a hidden type from an underlying data type.
+/// 
+/// It is a thin wrapper around `Hidden` and retains its useful properties:
+/// - The data is not subject to `Debug` or `Display` output, which are masked.
+/// - The data can only be accessed by (immutable or mutable) reference, and cannot be copied.
+/// - The data zeroizes when dropped, and can also be manually zeroized.
+/// - Cloning is safe.
+/// 
+/// The macro is a useful way to generate a hidden type that is subject to the compiler's type guarantees.
+/// This can be useful if you need multiple hidden types that use the same underlying data type, but shouldn't be confused for each other.
+/// 
 /// ```edition2018
 /// # #[macro_use] extern crate tari_utilities;
-/// # use serde::{Deserialize, Serialize};
+/// # use rand::rngs::OsRng;
+/// # use rand::RngCore;
 /// # use tari_utilities::Hidden;
 /// # use zeroize::Zeroize;
 /// # fn main() {
+/// // Define a hidden type with a `[u8; 32]` data type
 /// hidden_type!(MyHiddenType, [u8; 32]);
-/// let example = MyHiddenType::default();
-/// assert_eq!(example.reveal(), &[0u8; 32]);
+/// 
+/// // Instantiate using existing data
+/// let mut example = MyHiddenType::from([1u8; 32]);
+/// 
+/// // Access the data by immutable reference
+/// assert_eq!(example.reveal(), &[1u8; 32]);
+/// 
+/// // Access the data by mutable reference
+/// let mut rng = OsRng;
+/// rng.fill_bytes(example.reveal_mut());
+/// 
+/// // Clone the data safely
+/// let mut example_clone = example.clone();
+/// 
+/// // Zeroize the data manually
+/// example_clone.zeroize();
+/// assert_eq!(example_clone.reveal(), &[0u8; 32]);
 /// # }
 /// ```
 #[macro_export]
 macro_rules! hidden_type {
     ($name:ident, $type:ty) => {
         /// A hidden type
-        #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize, Zeroize)]
-        #[serde(transparent)]
+        #[derive(Clone, Debug, Zeroize)]
         pub struct $name
-        where
-            $type: Zeroize,
         {
             data: Hidden<$type>,
         }
@@ -74,6 +95,7 @@ macro_rules! hidden_type {
         }
 
         impl From<$type> for $name {
+            /// Hide existing data
             fn from(t: $type) -> Self {
                 Self { data: Hidden::hide(t) }
             }
@@ -81,18 +103,23 @@ macro_rules! hidden_type {
     };
 }
 
-/// A generic type for data that needs to be kept hidden and zeroized when out of scope
+/// A generic type for data that needs to be kept hidden and zeroized when out of scope, and is accessible only by reference.
 ///
-/// You can define a hidden type using any underlying type that supports `Default` and `Zeroize`.
+/// You can define a hidden type using any underlying data type that implements `Zeroize` and serialization.
 /// This is the case for most basic types that you probably care about.
 ///
-/// Hidden data can't be copied, which is an intentional design decision, and you can only access it as a reference.
-/// However, it supports other functionality transparently: cloning, equality, ordering, serialization, and the like.
-///
+/// Hidden data has useful properties:
+/// - The data is not subject to `Debug` or `Display` output, which are masked.
+/// - The data can only be accessed by (immutable or mutable) reference, and cannot be copied.
+/// - The data zeroizes when dropped, and can also be manually zeroized.
+/// - Cloning is safe.
+/// - Serialization and deserialization are supported transparently.
+/// 
 /// ```edition2018
 /// # use rand::rngs::OsRng;
 /// # use rand::RngCore;
 /// # use tari_utilities::hidden::Hidden;
+/// # use zeroize::Zeroize;
 ///
 /// // In this example, we need to handle secret data of type `[u8; 32]`.
 ///
@@ -104,14 +131,18 @@ macro_rules! hidden_type {
 ///
 /// // We can create default hidden data and then modify it as a mutable reference; this is common for functions that act on data in place
 /// let mut rng = OsRng;
-/// let mut hidden_in_place = Hidden::<[u8; 32]>::default();
+/// let mut hidden_in_place = Hidden::<[u8; 32]>::hide([0u8; 32]);
 /// rng.fill_bytes(hidden_in_place.reveal_mut());
 ///
 /// // Cloning is safe to do
-/// let clone = hidden_in_place.clone();
+/// let mut clone = hidden_in_place.clone();
 /// assert_eq!(hidden_in_place.reveal(), clone.reveal());
+/// 
+/// // You can manually zeroize the data if you need to
+/// clone.zeroize();
+/// assert_eq!(clone.reveal(), &[0u8; 32]);
 /// ```
-#[derive(Clone, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct Hidden<T>
 where
@@ -184,18 +215,20 @@ where
 
 #[cfg(test)]
 mod tests {
+    use rand::rngs::OsRng;
+    use rand::RngCore;
+
     use super::*;
 
     #[test]
-    fn equality() {
-        assert_eq!(Hidden::<u8>::hide(0u8), Hidden::<u8>::hide(0u8));
-        assert_ne!(Hidden::<u8>::hide(0u8), Hidden::<u8>::hide(1u8));
-    }
+    fn references() {
+        // Check immutable reference
+        assert_eq!(Hidden::hide(0u8).reveal(), &0u8);
 
-    #[test]
-    fn reference() {
-        assert_eq!(Hidden::<u8>::hide(0u8).reveal(), &0u8);
-        assert_ne!(Hidden::<u8>::hide(0u8).reveal(), &1u8);
+        // Check mutable reference
+        let mut hidden = Hidden::hide([0u8; 32]);
+        let mut rng = OsRng;
+        rng.fill_bytes(hidden.reveal_mut());
     }
 
     #[test]
@@ -204,7 +237,7 @@ mod tests {
         let ser = serde_json::to_string(&hidden).unwrap();
 
         let deser: Hidden<u8> = serde_json::from_str(&ser).unwrap();
-        assert_eq!(hidden, deser);
+        assert_eq!(hidden.reveal(), deser.reveal());
     }
 
     #[test]
@@ -216,12 +249,19 @@ mod tests {
     }
 
     #[test]
-    fn types() {
+    fn macro_types() {
+        // The type supports `Serialize`
         hidden_type!(TypeA, [u8; 32]);
         hidden_type!(TypeB, [u8; 32]);
-        let a = TypeA::default();
-        let b = TypeB::default();
+        let a = TypeA::from([1u8; 32]);
+        let b = TypeB::from([1u8; 32]);
 
         assert_eq!(a.reveal(), b.reveal());
+
+        // The type does not support `Serialize`
+        hidden_type!(TypeC, [u8; 64]);
+        let c = TypeC::from([1u8; 64]);
+
+        assert_eq!(c.reveal(), &[1u8; 64]);
     }
 }
