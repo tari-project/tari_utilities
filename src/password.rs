@@ -1,15 +1,39 @@
+// Copyright 2022. The Tari Project
+//
+// Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+// following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+// disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+// following disclaimer in the documentation and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+// products derived from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+// USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 //! A type for handling a passphrase safely.
 
 use std::{error::Error, fmt::Display, str::FromStr};
 
+use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
+
 use crate::hidden::Hidden;
-use serde::{Deserialize, Serialize};
 
 /// A representation of a passphrase that zeroizes on drop, prevents display and debug output, and limits access to
 /// references
 ///
 /// The passphrase can be instantiated from a string or any type that can become a string.
 /// It is converted to a byte array, which can be accessed as a mutable or immutable reference.
+/// You can serialize and deserialize it transparently.
 ///
 /// ```edition2018
 /// # use tari_utilities::SafePassword;
@@ -23,7 +47,7 @@ use serde::{Deserialize, Serialize};
 ///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(transparent)]
 pub struct SafePassword {
     passphrase: Hidden<Vec<u8>>,
@@ -57,13 +81,28 @@ impl FromStr for SafePassword {
     type Err = PasswordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self { passphrase: Hidden::<Vec<u8>>::hide(<&str as Into<String>>::into(s).into_bytes()) })
+        Ok(Self {
+            passphrase: Hidden::<Vec<u8>>::hide(String::from(s).into_bytes()),
+        })
     }
 }
 
 impl<S: Into<String>> From<S> for SafePassword {
     fn from(s: S) -> Self {
-        Self { passphrase: Hidden::<Vec<u8>>::hide(s.into().into_bytes()) }
+        Self {
+            passphrase: Hidden::<Vec<u8>>::hide(s.into().into_bytes()),
+        }
+    }
+}
+
+impl Serialize for SafePassword {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: Serializer {
+        let mut seq = serializer.serialize_seq(Some(self.passphrase.reveal().len()))?;
+        for e in self.passphrase.reveal() {
+            seq.serialize_element(e)?;
+        }
+        seq.end()
     }
 }
 
@@ -86,13 +125,11 @@ mod tests {
     }
 
     #[test]
-    fn serialize() {
-        let password = "password";
-
-        let hidden = SafePassword::from(password);
-        let ser = serde_json::to_string(&hidden).unwrap();
-
+    fn serialization() {
+        let safe_password = SafePassword::from("password");
+        let ser = serde_json::to_string(&safe_password).unwrap();
         let deser: SafePassword = serde_json::from_str(&ser).unwrap();
-        assert_eq!(hidden.reveal(), deser.reveal());
+
+        assert_eq!(safe_password.reveal(), deser.reveal());
     }
 }

@@ -23,48 +23,52 @@
 //! Sometimes you need to handle sensitive data, like a passphrase or key material.
 //! There are pitfalls here that you want to avoid: the data should be zeroized when it goes out of scope, shouldn't be
 //! displayed or output to debug logs, shouldn't be unintentionally copied or moved, and often should have strict type
-//! differentiation to avoid it being misused in an unintended context. This library provides a generic type that can
-//! help.
+//! differentiation to avoid it being misused in an unintended context. This library provides a generic type and macro
+//! that can help.
 
-use std::{any::type_name, fmt};
+use std::{
+    any::type_name,
+    fmt,
+    ops::{Deref, DerefMut},
+};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use zeroize::Zeroize;
 
 /// This is a macro that produces a hidden type from an underlying data type.
-/// 
+///
 /// It is a thin wrapper around `Hidden` and retains its useful properties:
 /// - The data is not subject to `Debug` or `Display` output, which are masked.
 /// - The data can only be accessed by (immutable or mutable) reference, and cannot be copied.
 /// - The data zeroizes when dropped, and can also be manually zeroized.
 /// - Cloning is safe.
-/// 
+///
 /// The macro is a useful way to generate a hidden type that is subject to the compiler's type guarantees.
-/// This can be useful if you need multiple hidden types that use the same underlying data type, but shouldn't be confused for each other.
-/// 
+/// This can be useful if you need multiple hidden types that use the same underlying data type, but shouldn't be
+/// confused for each other.
+///
 /// ```edition2018
 /// # #[macro_use] extern crate tari_utilities;
-/// # use rand::rngs::OsRng;
-/// # use rand::RngCore;
 /// # use tari_utilities::Hidden;
 /// # use zeroize::Zeroize;
 /// # fn main() {
 /// // Define a hidden type with a `[u8; 32]` data type
 /// hidden_type!(MyHiddenType, [u8; 32]);
-/// 
+///
 /// // Instantiate using existing data
 /// let mut example = MyHiddenType::from([1u8; 32]);
-/// 
+///
 /// // Access the data by immutable reference
 /// assert_eq!(example.reveal(), &[1u8; 32]);
-/// 
+///
 /// // Access the data by mutable reference
-/// let mut rng = OsRng;
-/// rng.fill_bytes(example.reveal_mut());
-/// 
+/// let example_mut_ref = example.reveal_mut();
+/// *example_mut_ref = [42u8; 32];
+/// assert_eq!(example.reveal(), &[42u8; 32]);
+///
 /// // Clone the data safely
 /// let mut example_clone = example.clone();
-/// 
+///
 /// // Zeroize the data manually
 /// example_clone.zeroize();
 /// assert_eq!(example_clone.reveal(), &[0u8; 32]);
@@ -75,8 +79,7 @@ macro_rules! hidden_type {
     ($name:ident, $type:ty) => {
         /// A hidden type
         #[derive(Clone, Debug, Zeroize)]
-        pub struct $name
-        {
+        pub struct $name {
             data: Hidden<$type>,
         }
 
@@ -97,15 +100,18 @@ macro_rules! hidden_type {
         impl From<$type> for $name {
             /// Hide existing data
             fn from(t: $type) -> Self {
-                Self { data: Hidden::hide(t) }
+                Self {
+                    data: Hidden::hide(t),
+                }
             }
         }
     };
 }
 
-/// A generic type for data that needs to be kept hidden and zeroized when out of scope, and is accessible only by reference.
+/// A generic type for data that needs to be kept hidden and zeroized when out of scope, and is accessible only by
+/// reference.
 ///
-/// You can define a hidden type using any underlying data type that implements `Zeroize` and serialization.
+/// You can define a hidden type using any underlying data type that implements `Zeroize`.
 /// This is the case for most basic types that you probably care about.
 ///
 /// Hidden data has useful properties:
@@ -113,11 +119,11 @@ macro_rules! hidden_type {
 /// - The data can only be accessed by (immutable or mutable) reference, and cannot be copied.
 /// - The data zeroizes when dropped, and can also be manually zeroized.
 /// - Cloning is safe.
-/// - Serialization and deserialization are supported transparently.
-/// 
+///
+/// Hidden data supports transparent deserialization, but you'll need to implement serialization yourself if you need
+/// it.
+///
 /// ```edition2018
-/// # use rand::rngs::OsRng;
-/// # use rand::RngCore;
 /// # use tari_utilities::hidden::Hidden;
 /// # use zeroize::Zeroize;
 ///
@@ -130,53 +136,49 @@ macro_rules! hidden_type {
 /// assert_eq!(hidden_from_data.reveal(), &[1u8; 32]);
 ///
 /// // We can create default hidden data and then modify it as a mutable reference; this is common for functions that act on data in place
-/// let mut rng = OsRng;
 /// let mut hidden_in_place = Hidden::<[u8; 32]>::hide([0u8; 32]);
-/// rng.fill_bytes(hidden_in_place.reveal_mut());
+/// let hidden_in_place_mut_ref = hidden_in_place.reveal_mut();
+/// *hidden_in_place_mut_ref = [42u8; 32];
+/// assert_eq!(hidden_in_place.reveal(), &[42u8; 32]);
 ///
 /// // Cloning is safe to do
 /// let mut clone = hidden_in_place.clone();
 /// assert_eq!(hidden_in_place.reveal(), clone.reveal());
-/// 
+///
 /// // You can manually zeroize the data if you need to
 /// clone.zeroize();
 /// assert_eq!(clone.reveal(), &[0u8; 32]);
 /// ```
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize)]
 #[serde(transparent)]
 pub struct Hidden<T>
-where
-    T: Zeroize,
+where T: Zeroize
 {
     inner: Box<T>,
 }
 
 impl<T> Hidden<T>
-where
-    T: Zeroize,
+where T: Zeroize
 {
     /// Create new hidden data from the underlying type
     pub fn hide(inner: T) -> Self {
-        Self {
-            inner: Box::new(inner),
-        }
+        Self { inner: Box::new(inner) }
     }
 
     /// Reveal the hidden data as an immutable reference
     pub fn reveal(&self) -> &T {
-        &self.inner
+        self.inner.deref()
     }
 
     /// Reveal the hidden data as a mutable reference
     pub fn reveal_mut(&mut self) -> &mut T {
-        &mut self.inner
+        self.inner.deref_mut()
     }
 }
 
 /// Only output masked data for debugging, keeping the hidden data hidden
 impl<T> fmt::Debug for Hidden<T>
-where
-    T: Zeroize,
+where T: Zeroize
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Hidden<{}>", type_name::<T>())
@@ -185,8 +187,7 @@ where
 
 /// Only display masked data, keeping the hidden data hidden
 impl<T> fmt::Display for Hidden<T>
-where
-    T: Zeroize,
+where T: Zeroize
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Hidden<{}>", type_name::<T>())
@@ -195,8 +196,7 @@ where
 
 /// Zeroize the hidden data
 impl<T> Zeroize for Hidden<T>
-where
-    T: Zeroize,
+where T: Zeroize
 {
     fn zeroize(&mut self) {
         self.inner.zeroize();
@@ -205,8 +205,7 @@ where
 
 /// Zeroize the hidden data when dropped
 impl<T> Drop for Hidden<T>
-where
-    T: Zeroize,
+where T: Zeroize
 {
     fn drop(&mut self) {
         self.zeroize();
@@ -215,9 +214,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use rand::rngs::OsRng;
-    use rand::RngCore;
-
     use super::*;
 
     #[test]
@@ -227,14 +223,18 @@ mod tests {
 
         // Check mutable reference
         let mut hidden = Hidden::hide([0u8; 32]);
-        let mut rng = OsRng;
-        rng.fill_bytes(hidden.reveal_mut());
+        let hidden_mut_ref = hidden.reveal_mut();
+
+        *hidden_mut_ref = [42u8; 32];
+        assert_eq!(hidden.reveal(), &[42u8; 32]);
     }
 
     #[test]
-    fn serialize() {
-        let hidden = Hidden::<u8>::hide(1u8);
-        let ser = serde_json::to_string(&hidden).unwrap();
+    fn deserialize() {
+        let value = 1u8;
+        let hidden = Hidden::<u8>::hide(value);
+
+        let ser = value.to_string();
 
         let deser: Hidden<u8> = serde_json::from_str(&ser).unwrap();
         assert_eq!(hidden.reveal(), deser.reveal());
