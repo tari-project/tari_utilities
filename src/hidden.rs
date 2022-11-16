@@ -39,13 +39,17 @@ use zeroize::Zeroize;
 ///
 /// It is a thin wrapper around `Hidden` and retains its useful properties:
 /// - The data is not subject to `Debug` or `Display` output, which are masked.
-/// - The data can only be accessed by (immutable or mutable) reference, and cannot be copied.
+/// - The data can only be accessed by (immutable or mutable) reference.
 /// - The data zeroizes when dropped, and can also be manually zeroized.
 /// - Cloning is safe.
 ///
 /// The macro is a useful way to generate a hidden type that is subject to the compiler's type guarantees.
 /// This can be useful if you need multiple hidden types that use the same underlying data type, but shouldn't be
 /// confused for each other.
+/// 
+/// Note that it may not be safe to dereference the hidden data if its type implements `Copy`.
+/// If the type does not implement `Copy`, you should be fine.
+/// If it does, avoid dereferencing.
 ///
 /// ```edition2018
 /// # #[macro_use] extern crate tari_utilities;
@@ -116,9 +120,13 @@ macro_rules! hidden_type {
 ///
 /// Hidden data has useful properties:
 /// - The data is not subject to `Debug` or `Display` output, which are masked.
-/// - The data can only be accessed by (immutable or mutable) reference, and cannot be copied.
+/// - The data can only be accessed by (immutable or mutable) reference.
 /// - The data zeroizes when dropped, and can also be manually zeroized.
 /// - Cloning is safe.
+///
+/// Note that it may not be safe to dereference the hidden data if its type implements `Copy`.
+/// If the type does not implement `Copy`, you should be fine.
+/// If it does, avoid dereferencing.
 ///
 /// Hidden data supports transparent deserialization, but you'll need to implement serialization yourself if you need
 /// it.
@@ -250,18 +258,12 @@ mod tests {
 
     #[test]
     fn macro_types() {
-        // The type supports `Serialize`
         hidden_type!(TypeA, [u8; 32]);
         hidden_type!(TypeB, [u8; 32]);
         let a = TypeA::from([1u8; 32]);
         let b = TypeB::from([1u8; 32]);
 
-        assert_eq!(a.reveal(), b.reveal());
-
-        // The type does not support `Serialize`
-        hidden_type!(TypeC, [u8; 64]);
-        let c = TypeC::from([1u8; 64]);
-
-        assert_eq!(c.reveal(), &[1u8; 64]);
+        assert_eq!(a.reveal(), &[1u8; 32]);
+        assert_eq!(b.reveal(), &[1u8; 32]);
     }
 }
