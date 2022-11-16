@@ -34,6 +34,7 @@ pub mod hidden;
 pub mod locks;
 pub mod message_format;
 pub mod password;
+pub mod safe_array;
 pub mod serde;
 
 pub use self::{
