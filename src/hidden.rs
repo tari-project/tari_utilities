@@ -46,7 +46,7 @@ use zeroize::Zeroize;
 /// The macro is a useful way to generate a hidden type that is subject to the compiler's type guarantees.
 /// This can be useful if you need multiple hidden types that use the same underlying data type, but shouldn't be
 /// confused for each other.
-/// 
+///
 /// Note that it may not be safe to dereference the hidden data if its type implements `Copy`.
 /// If the type does not implement `Copy`, you should be fine.
 /// If it does, avoid dereferencing.

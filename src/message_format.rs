@@ -71,7 +71,7 @@ where T: DeserializeOwned + Serialize
 
     fn to_base64(&self) -> Result<String, MessageFormatError> {
         let val = self.to_binary()?;
-        Ok(base64::encode(&val))
+        Ok(base64::encode(val))
     }
 
     fn from_binary(msg: &[u8]) -> Result<Self, MessageFormatError> {
