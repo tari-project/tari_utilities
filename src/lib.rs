@@ -30,10 +30,11 @@ pub mod fixed_set;
 pub mod hash;
 pub mod hex;
 #[macro_use]
-pub mod locks;
 pub mod hidden;
+pub mod locks;
 pub mod message_format;
 pub mod password;
+pub mod safe_array;
 pub mod serde;
 
 pub use self::{
