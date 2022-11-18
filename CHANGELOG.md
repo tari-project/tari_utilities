@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.9](https://github.com/tari-project/tari_utilities/compare/v0.4.8...v0.4.9) (2022-11-18)
+
+
+### Features
+
+* improve hidden data handling ([#52](https://github.com/tari-project/tari_utilities/issues/52)) ([f35006f](https://github.com/tari-project/tari_utilities/commit/f35006f7179533b7ac3a7a9ee1d6932475b95cec))
+
 ### [0.4.8](https://github.com/tari-project/tari_utilities/compare/v0.4.7...v0.4.8) (2022-10-05)
 
 
