@@ -128,7 +128,7 @@ mod tests {
     fn check_serde_hex_binary() {
         let hex_or_bytes = HexOrBytes([1, 2, 3, 255]);
         let mut expected: Vec<u8> = Vec::new();
-        expected.write_all(&(&hex_or_bytes.0).len().to_le_bytes()).unwrap();
+        expected.write_all(&hex_or_bytes.0.len().to_le_bytes()).unwrap();
         expected.write_all(&[1, 2, 3, 255]).unwrap();
         assert_eq!(bincode::serialize(&hex_or_bytes).unwrap(), expected);
         let restored: HexOrBytes = bincode::deserialize(&expected).unwrap();
