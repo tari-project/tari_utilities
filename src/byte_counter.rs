@@ -61,6 +61,7 @@ mod test {
         let buf = [0u8, 1u8, 2u8, 3u8];
         let new_count = byte_counter.write(&buf).unwrap();
         assert_eq!(byte_counter.get(), new_count);
+        assert_eq!(byte_counter.get(), buf.len());
     }
 
     #[test]
