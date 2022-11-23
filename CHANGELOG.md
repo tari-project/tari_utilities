@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.10](https://github.com/tari-project/tari_utilities/compare/v0.4.9...v0.4.10) (2022-11-23)
+
+
+### Features
+
+* add borsh ([#53](https://github.com/tari-project/tari_utilities/issues/53)) ([469be24](https://github.com/tari-project/tari_utilities/commit/469be240ed6561007a0191633f6521dd42cfde9c))
+
 ### [0.4.9](https://github.com/tari-project/tari_utilities/compare/v0.4.8...v0.4.9) (2022-11-18)
 
 
