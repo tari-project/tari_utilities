@@ -25,7 +25,7 @@
 //! It stores bytes as hex for human readable formats and
 //! uses bytes for binary formats.
 
-use std::{fmt, marker::PhantomData};
+use core::{fmt, marker::PhantomData};
 
 use serde::{
     de::{Error, Visitor},

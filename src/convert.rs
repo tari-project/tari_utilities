@@ -22,7 +22,7 @@
 
 //! Function which tries to convert a series of `T`s to `U`s.
 
-use std::convert::TryInto;
+use core::convert::TryInto;
 
 /// Tries to convert a series of `T`s to `U`s, returning an error at the first failure.
 pub fn try_convert_all<T, U, I>(into_iter: I) -> Result<Vec<U>, T::Error>

@@ -25,20 +25,20 @@
 use base64;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json;
-use thiserror::Error;
+use snafu::prelude::*;
 
 /// Errors for [MessageFormat] trait.
-#[derive(Debug, Error)]
+#[derive(Debug, Snafu)]
 #[allow(missing_docs)]
 pub enum MessageFormatError {
-    #[error("An error occurred serialising an object into binary")]
-    BinarySerializeError,
-    #[error("An error occurred deserialising binary data into an object")]
-    BinaryDeserializeError,
-    #[error("An error occurred de-/serialising an object from/into JSON")]
-    JSONError(#[from] serde_json::error::Error),
-    #[error("An error occurred deserialising an object from Base64")]
-    Base64DeserializeError(#[from] base64::DecodeError),
+    #[snafu(display("An error occurred serialising an object into binary"))]
+    BinarySerializeError {},
+    #[snafu(display("An error occurred deserialising binary data into an object"))]
+    BinaryDeserializeError {},
+    #[snafu(display("An error occurred de-/serialising an object from/into JSON"))]
+    JSONError {},
+    #[snafu(display("An error occurred deserialising an object from Base64"))]
+    Base64DeserializeError {},
 }
 
 /// Trait for converting to/from binary/json/base64.
@@ -62,11 +62,11 @@ impl<T> MessageFormat for T
 where T: DeserializeOwned + Serialize
 {
     fn to_binary(&self) -> Result<Vec<u8>, MessageFormatError> {
-        bincode::serialize(self).map_err(|_| MessageFormatError::BinarySerializeError)
+        bincode::serialize(self).map_err(|_| MessageFormatError::BinarySerializeError {})
     }
 
     fn to_json(&self) -> Result<String, MessageFormatError> {
-        serde_json::to_string(self).map_err(MessageFormatError::JSONError)
+        serde_json::to_string(self).map_err(|_| MessageFormatError::JSONError {})
     }
 
     fn to_base64(&self) -> Result<String, MessageFormatError> {
@@ -75,23 +75,22 @@ where T: DeserializeOwned + Serialize
     }
 
     fn from_binary(msg: &[u8]) -> Result<Self, MessageFormatError> {
-        bincode::deserialize(msg).map_err(|_| MessageFormatError::BinaryDeserializeError)
+        bincode::deserialize(msg).map_err(|_| MessageFormatError::BinaryDeserializeError {})
     }
 
     fn from_json(msg: &str) -> Result<Self, MessageFormatError> {
         let mut de = serde_json::Deserializer::from_reader(msg.as_bytes());
-        Deserialize::deserialize(&mut de).map_err(MessageFormatError::JSONError)
+        Deserialize::deserialize(&mut de).map_err(|_| MessageFormatError::JSONError {})
     }
 
     fn from_base64(msg: &str) -> Result<Self, MessageFormatError> {
-        let buf = base64::decode(msg)?;
+        let buf = base64::decode(msg).map_err(|_| MessageFormatError::Base64DeserializeError {})?;
         Self::from_binary(&buf)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use base64::DecodeError as Base64Error;
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -185,7 +184,7 @@ mod test {
     #[test]
     fn fail_json() {
         let err = TestMessage::from_json("{\"key\":5}").unwrap_err();
-        assert!(matches!(err, MessageFormatError::JSONError(e) if e.line() == 1 && e.column() == 9 && e.is_data()));
+        assert!(matches!(err, MessageFormatError::JSONError{}));
     }
 
     #[test]
@@ -193,16 +192,16 @@ mod test {
         let err = TestMessage::from_base64("aaaaa$aaaaa").unwrap_err();
         assert!(matches!(
             err,
-            MessageFormatError::Base64DeserializeError(Base64Error::InvalidByte(5, b'$'))
+            MessageFormatError::Base64DeserializeError{}
         ));
 
         let err = TestMessage::from_base64("j6h0b21vcnJvdzKTpXRvZGF5ZMA=").unwrap_err();
-        assert!(matches!(err, MessageFormatError::BinaryDeserializeError));
+        assert!(matches!(err, MessageFormatError::BinaryDeserializeError{}));
     }
 
     #[test]
     fn fail_binary() {
         let err = TestMessage::from_binary(b"").unwrap_err();
-        assert!(matches!(err, MessageFormatError::BinaryDeserializeError));
+        assert!(matches!(err, MessageFormatError::BinaryDeserializeError{}));
     }
 }

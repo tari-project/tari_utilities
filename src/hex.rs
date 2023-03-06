@@ -22,13 +22,11 @@
 
 //! Functions for conversion between binary and hex string.
 
-use std::{
-    fmt::{LowerHex, Write},
-    num::ParseIntError,
-};
+use core::fmt::{LowerHex, Write};
 
+#[cfg(feature = "serde")]
 use serde::Serializer;
-use thiserror::Error;
+use snafu::prelude::*;
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
 pub trait Hex {
@@ -45,15 +43,15 @@ pub trait Hex {
 }
 
 /// Errors for [Hex] trait.
-#[derive(Debug, Error)]
+#[derive(Debug, Snafu)]
 #[allow(missing_docs)]
 pub enum HexError {
-    #[error("Only hexadecimal characters (0-9,a-f) are permitted")]
-    InvalidCharacter(#[from] ParseIntError),
-    #[error("Hex string lengths must be a multiple of 2")]
-    LengthError,
-    #[error("Invalid hex representation for the target type")]
-    HexConversionError,
+    #[snafu(display("Only hexadecimal characters (0-9,a-f) are permitted"))]
+    InvalidCharacter {},
+    #[snafu(display("Hex string lengths must be a multiple of 2"))]
+    LengthError {},
+    #[snafu(display("Invalid hex representation for the target type"))]
+    HexConversionError {},
 }
 
 /// Encode the provided bytes into a hex string.
@@ -79,10 +77,10 @@ pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Vec<String> {
 pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     let hex_trim = hex_str.trim();
     if hex_trim.len() % 2 == 1 {
-        return Err(HexError::LengthError);
+        return Err(HexError::LengthError {});
     }
     if !hex_str.is_ascii() {
-        return Err(HexError::HexConversionError);
+        return Err(HexError::HexConversionError {});
     }
     let hex_trim = if (hex_trim.len() >= 2) && (&hex_trim[..2] == "0x") {
         &hex_trim[2..]
@@ -92,12 +90,13 @@ pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     let num_bytes = hex_trim.len() / 2;
     let mut result = vec![0u8; num_bytes];
     for i in 0..num_bytes {
-        result[i] = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16).map_err(HexError::InvalidCharacter)?;
+        result[i] = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16).map_err(|_| HexError::InvalidCharacter {})?;
     }
     Ok(result)
 }
 
 /// Use a serde serializer to serialize the hex string of the given object.
+#[cfg(feature = "serde")]
 pub fn serialize_to_hex<S, T>(t: &T, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -142,7 +141,7 @@ mod test {
         let result = from_hex("800");
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(matches!(err, HexError::LengthError));
+        assert!(matches!(err, HexError::LengthError{}));
         // Check that message is the doc message above
         assert_eq!(err.to_string(), "Hex string lengths must be a multiple of 2");
     }
@@ -152,7 +151,7 @@ mod test {
         let result = from_hex("1234567890ABCDEFG1");
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(matches!(err, HexError::InvalidCharacter(_)));
+        assert!(matches!(err, HexError::InvalidCharacter{..}));
         assert_eq!(err.to_string(), "Only hexadecimal characters (0-9,a-f) are permitted");
     }
 }

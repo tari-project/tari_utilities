@@ -22,7 +22,7 @@
 
 //! An array-like type with safety features that make it suitable for cryptographic keys.
 
-use std::{
+use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
 };

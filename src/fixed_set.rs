@@ -22,7 +22,7 @@
 
 //! Data structure describing a fixed set of size _n_.
 
-use std::ops::Add;
+use core::ops::Add;
 
 /// Data structure for fixed set of size _n_.
 #[derive(Clone, Debug)]

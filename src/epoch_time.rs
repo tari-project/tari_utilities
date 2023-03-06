@@ -31,10 +31,10 @@ use std::{
 #[cfg(feature = "borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
 use newtype_ops::newtype_ops;
-use serde::{Deserialize, Serialize};
 
 /// The timestamp, defined as the amount of seconds past from UNIX epoch.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize,))]
 pub struct EpochTime(u64);
 

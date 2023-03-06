@@ -22,19 +22,19 @@
 
 //! A trait that offers representation of data types as a byte array or hex string.
 
-use thiserror::Error;
+use snafu::prelude::*;
 
 use crate::hex::{from_hex, to_hex, Hex, HexError};
 
 /// Errors for [ByteArray] trait.
-#[derive(Debug, Error, PartialEq, Eq)]
+#[derive(Debug, Snafu, PartialEq, Eq)]
 pub enum ByteArrayError {
     /// An array can't be parsed.
-    #[error("Could not create a ByteArray when converting from a different format: {0}")]
-    ConversionError(String),
+    #[snafu(display("Could not create a ByteArray when converting from a different format: `{reason}'"))]
+    ConversionError { reason: String },
     /// The lenght doesn't fit to the array.
-    #[error("The input data was the incorrect length to perform the desired conversion")]
-    IncorrectLength,
+    #[snafu(display("The input data was the incorrect length to perform the desired conversion"))]
+    IncorrectLength {},
 }
 
 /// Trait the allows converting to/from [array][[u8]]/[vec][[u8]].
@@ -85,7 +85,7 @@ impl ByteArray for Vec<u8> {
 impl<const I: usize> ByteArray for [u8; I] {
     fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
         if bytes.len() != I {
-            return Err(ByteArrayError::IncorrectLength);
+            return Err(ByteArrayError::IncorrectLength {});
         }
         let mut a = [0u8; I];
         a.copy_from_slice(bytes);
@@ -100,7 +100,7 @@ impl<const I: usize> ByteArray for [u8; I] {
 impl<T: ByteArray> Hex for T {
     fn from_hex(hex: &str) -> Result<Self, HexError> {
         let v = from_hex(hex)?;
-        Self::from_bytes(&v).map_err(|_| HexError::HexConversionError)
+        Self::from_bytes(&v).map_err(|_| HexError::HexConversionError {})
     }
 
     fn to_hex(&self) -> String {
@@ -152,9 +152,9 @@ mod test {
     #[test]
     fn test_error_handling() {
         let err = <[u8; 32]>::from_bytes(&[1, 2, 3, 4]).unwrap_err();
-        assert_eq!(err, ByteArrayError::IncorrectLength);
+        assert_eq!(err, ByteArrayError::IncorrectLength{});
 
         let err = <[u8; 32]>::from_hex("abcd").unwrap_err();
-        assert!(matches!(err, HexError::HexConversionError));
+        assert!(matches!(err, HexError::HexConversionError{}));
     }
 }

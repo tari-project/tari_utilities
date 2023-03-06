@@ -25,6 +25,7 @@ pub mod bit;
 pub mod byte_array;
 pub mod convert;
 pub mod encoding;
+#[cfg(feature = "epoch")]
 pub mod epoch_time;
 pub mod fixed_set;
 pub mod hash;
@@ -32,11 +33,12 @@ pub mod hex;
 #[macro_use]
 pub mod hidden;
 pub mod locks;
+#[cfg(feature = "serde")]
 pub mod message_format;
 pub mod password;
 pub mod safe_array;
+#[cfg(feature = "serde")]
 pub mod serde;
-
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
     hash::Hashable,
