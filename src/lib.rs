@@ -24,6 +24,7 @@
 pub mod bit;
 pub mod byte_array;
 pub mod convert;
+#[cfg(feature = "monero")]
 pub mod encoding;
 #[cfg(feature = "epoch")]
 pub mod epoch_time;
