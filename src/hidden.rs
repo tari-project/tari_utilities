@@ -158,7 +158,7 @@ macro_rules! hidden_type {
 /// ```
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-#[serde(transparent)]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct Hidden<T>
 where T: Zeroize
 {

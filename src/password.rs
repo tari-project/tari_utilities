@@ -49,7 +49,7 @@ use crate::hidden::Hidden;
 /// ```
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-#[serde(transparent)]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct SafePassword {
     passphrase: Hidden<Vec<u8>>,
 }
@@ -71,7 +71,7 @@ impl SafePassword {
 pub struct PasswordError;
 
 impl Display for PasswordError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "PasswordError")
     }
 }
