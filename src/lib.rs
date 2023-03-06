@@ -21,6 +21,10 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
+
+
+#![feature(restricted_std)]
+
 pub mod bit;
 pub mod byte_array;
 pub mod convert;
