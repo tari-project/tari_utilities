@@ -39,6 +39,7 @@ pub mod hidden;
 pub mod locks;
 #[cfg(feature = "serde")]
 pub mod message_format;
+#[cfg(feature = "zeroize")]
 pub mod password;
 #[cfg(feature = "subtle")]
 pub mod safe_array;
@@ -47,6 +48,9 @@ pub mod serde;
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
     hash::Hashable,
+};
+#[cfg(feature = "zeroize")]
+pub use self::{
     hidden::Hidden,
     password::SafePassword,
 };
