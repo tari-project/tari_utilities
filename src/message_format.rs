@@ -184,24 +184,21 @@ mod test {
     #[test]
     fn fail_json() {
         let err = TestMessage::from_json("{\"key\":5}").unwrap_err();
-        assert!(matches!(err, MessageFormatError::JSONError{}));
+        assert!(matches!(err, MessageFormatError::JSONError {}));
     }
 
     #[test]
     fn fail_base64() {
         let err = TestMessage::from_base64("aaaaa$aaaaa").unwrap_err();
-        assert!(matches!(
-            err,
-            MessageFormatError::Base64DeserializeError{}
-        ));
+        assert!(matches!(err, MessageFormatError::Base64DeserializeError {}));
 
         let err = TestMessage::from_base64("j6h0b21vcnJvdzKTpXRvZGF5ZMA=").unwrap_err();
-        assert!(matches!(err, MessageFormatError::BinaryDeserializeError{}));
+        assert!(matches!(err, MessageFormatError::BinaryDeserializeError {}));
     }
 
     #[test]
     fn fail_binary() {
         let err = TestMessage::from_binary(b"").unwrap_err();
-        assert!(matches!(err, MessageFormatError::BinaryDeserializeError{}));
+        assert!(matches!(err, MessageFormatError::BinaryDeserializeError {}));
     }
 }

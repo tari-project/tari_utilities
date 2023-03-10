@@ -22,7 +22,6 @@
 
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
 
-
 #![feature(restricted_std)]
 
 pub mod bit;
@@ -35,12 +34,13 @@ pub mod epoch_time;
 pub mod fixed_set;
 pub mod hash;
 pub mod hex;
-#[macro_use]
+#[cfg(feature = "zeroize")]
 pub mod hidden;
 pub mod locks;
 #[cfg(feature = "serde")]
 pub mod message_format;
 pub mod password;
+#[cfg(feature = "subtle")]
 pub mod safe_array;
 #[cfg(feature = "serde")]
 pub mod serde;

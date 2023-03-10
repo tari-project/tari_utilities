@@ -152,9 +152,9 @@ mod test {
     #[test]
     fn test_error_handling() {
         let err = <[u8; 32]>::from_bytes(&[1, 2, 3, 4]).unwrap_err();
-        assert_eq!(err, ByteArrayError::IncorrectLength{});
+        assert_eq!(err, ByteArrayError::IncorrectLength {});
 
         let err = <[u8; 32]>::from_hex("abcd").unwrap_err();
-        assert!(matches!(err, HexError::HexConversionError{}));
+        assert!(matches!(err, HexError::HexConversionError {}));
     }
 }

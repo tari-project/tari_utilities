@@ -28,6 +28,7 @@ use core::{
 };
 
 use subtle::ConstantTimeEq;
+#[cfg(feature = "zeroize")]
 use zeroize::Zeroize;
 
 /// Sometimes it is not good that an array be used for a cryptographic key.
@@ -100,6 +101,7 @@ impl<T, const N: usize> DerefMut for SafeArray<T, N> {
     }
 }
 
+#[cfg(feature = "zeroize")]
 impl<T, const N: usize> Zeroize for SafeArray<T, N>
 where T: Zeroize
 {

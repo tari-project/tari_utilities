@@ -141,7 +141,7 @@ mod test {
         let result = from_hex("800");
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(matches!(err, HexError::LengthError{}));
+        assert!(matches!(err, HexError::LengthError {}));
         // Check that message is the doc message above
         assert_eq!(err.to_string(), "Hex string lengths must be a multiple of 2");
     }
@@ -151,7 +151,7 @@ mod test {
         let result = from_hex("1234567890ABCDEFG1");
         assert!(result.is_err());
         let err = result.unwrap_err();
-        assert!(matches!(err, HexError::InvalidCharacter{..}));
+        assert!(matches!(err, HexError::InvalidCharacter { .. }));
         assert_eq!(err.to_string(), "Only hexadecimal characters (0-9,a-f) are permitted");
     }
 }
