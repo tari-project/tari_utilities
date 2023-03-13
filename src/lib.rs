@@ -23,7 +23,10 @@
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
 
 #![no_std]
+
+#[macro_use]
 extern crate alloc;
+
 #[cfg(any(feature = "epoch", feature = "test"))]
 #[macro_use]
 extern crate std;
