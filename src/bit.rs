@@ -22,6 +22,7 @@
 #![allow(clippy::needless_range_loop)]
 //! Functions for conversion between integer and bit array.
 
+use alloc::vec::Vec;
 use core::mem;
 
 /// Converts a single input byte to 8 bits (little-endian).

@@ -22,7 +22,11 @@
 
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
 
-#![feature(restricted_std)]
+#![no_std]
+extern crate alloc;
+#[cfg(any(feature = "epoch", feature = "test"))]
+#[macro_use]
+extern crate std;
 
 pub mod bit;
 pub mod byte_array;
@@ -50,7 +54,4 @@ pub use self::{
     hash::Hashable,
 };
 #[cfg(feature = "zeroize")]
-pub use self::{
-    hidden::Hidden,
-    password::SafePassword,
-};
+pub use self::{hidden::Hidden, password::SafePassword};

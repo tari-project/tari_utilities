@@ -22,6 +22,7 @@
 
 //! An array-like type with safety features that make it suitable for cryptographic keys.
 
+use alloc::vec::Vec;
 use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},

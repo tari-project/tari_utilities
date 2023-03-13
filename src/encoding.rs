@@ -22,6 +22,8 @@
 
 //! A trait that handles [base58](https://crates.io/crates/base58-monero) encoding and decoding.
 
+use alloc::string::String;
+use alloc::string::ToString;
 use snafu::prelude::*;
 
 use crate::ByteArray;
@@ -60,6 +62,8 @@ impl<T: ByteArray> Base58 for T {
 
 #[cfg(test)]
 mod test {
+    use alloc::vec::Vec;
+
     use rand::{rngs::OsRng, RngCore};
 
     use super::*;

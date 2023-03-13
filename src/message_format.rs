@@ -22,6 +22,8 @@
 
 //! A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
 
+use alloc::{string::String, vec::Vec};
+
 use base64;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json;
@@ -91,6 +93,8 @@ where T: DeserializeOwned + Serialize
 
 #[cfg(test)]
 mod test {
+    use alloc::boxed::Box;
+use alloc::string::ToString;
     use serde::{Deserialize, Serialize};
 
     use super::*;

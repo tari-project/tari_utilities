@@ -22,6 +22,7 @@
 
 //! Function which tries to convert a series of `T`s to `U`s.
 
+use alloc::vec::Vec;
 use core::convert::TryInto;
 
 /// Tries to convert a series of `T`s to `U`s, returning an error at the first failure.

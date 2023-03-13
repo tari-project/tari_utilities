@@ -22,6 +22,7 @@
 
 //! Functions for conversion between binary and hex string.
 
+use alloc::{string::String, vec::Vec};
 use core::fmt::{LowerHex, Write};
 
 #[cfg(feature = "serde")]
@@ -108,7 +109,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-
+use alloc::string::ToString;
     #[test]
     fn test_to_hex() {
         assert_eq!(to_hex(&[0, 0, 0, 0]), "00000000");

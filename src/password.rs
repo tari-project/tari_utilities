@@ -21,6 +21,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! A type for handling a passphrase safely.
+use alloc::{string::String, vec::Vec};
 use core::{fmt::Display, str::FromStr};
 
 #[cfg(feature = "serde")]
@@ -109,7 +110,7 @@ impl Serialize for SafePassword {
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
-
+use alloc::string::ToString;
     use super::SafePassword;
 
     #[test]

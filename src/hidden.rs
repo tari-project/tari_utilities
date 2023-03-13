@@ -26,6 +26,7 @@
 //! differentiation to avoid it being misused in an unintended context. This library provides a generic type and macro
 //! that can help.
 
+use alloc::boxed::Box;
 use core::{
     any::type_name,
     fmt,
@@ -223,7 +224,7 @@ where T: Zeroize
 #[cfg(test)]
 mod tests {
     use super::*;
-
+use alloc::string::ToString;
     #[test]
     fn references() {
         // Check immutable reference

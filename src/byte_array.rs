@@ -22,6 +22,8 @@
 
 //! A trait that offers representation of data types as a byte array or hex string.
 
+use alloc::{string::String, vec::Vec};
+
 use snafu::prelude::*;
 
 use crate::hex::{from_hex, to_hex, Hex, HexError};

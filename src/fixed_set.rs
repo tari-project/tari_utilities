@@ -22,6 +22,7 @@
 
 //! Data structure describing a fixed set of size _n_.
 
+use alloc::vec::Vec;
 use core::ops::Add;
 
 /// Data structure for fixed set of size _n_.
@@ -113,7 +114,9 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
 
 #[cfg(test)]
 mod test {
-    use super::FixedSet;
+    use alloc::string::String;
+
+    use super::{FixedSet, *};
 
     #[derive(Eq, PartialEq, Clone, Debug, Default)]
     struct Foo {

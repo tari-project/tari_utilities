@@ -21,6 +21,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! A simple `Hashable` trait which is used to describe how an object should be hashed.
+use alloc::vec::Vec;
 
 /// Simple Hashable trait with single hash function.
 pub trait Hashable {
