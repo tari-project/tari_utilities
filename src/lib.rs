@@ -23,7 +23,8 @@
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
 
 #![no_std]
-
+// This is to allow no_std use
+#[allow(unused_imports)]
 #[macro_use]
 extern crate alloc;
 

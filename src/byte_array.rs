@@ -33,7 +33,10 @@ use crate::hex::{from_hex, to_hex, Hex, HexError};
 pub enum ByteArrayError {
     /// An array can't be parsed.
     #[snafu(display("Could not create a ByteArray when converting from a different format: `{reason}'"))]
-    ConversionError { reason: String },
+    ConversionError {
+        /// The reason for the error
+        reason: String,
+    },
     /// The lenght doesn't fit to the array.
     #[snafu(display("The input data was the incorrect length to perform the desired conversion"))]
     IncorrectLength {},
