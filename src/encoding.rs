@@ -22,8 +22,8 @@
 
 //! A trait that handles [base58](https://crates.io/crates/base58-monero) encoding and decoding.
 
-use alloc::string::String;
-use alloc::string::ToString;
+use alloc::string::{String, ToString};
+
 use snafu::prelude::*;
 
 use crate::ByteArray;

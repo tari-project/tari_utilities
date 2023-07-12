@@ -109,10 +109,10 @@ where T: ByteArray
 
 #[cfg(test)]
 mod tests {
+    use alloc::vec::Vec;
     use std::io::Write;
-use alloc::vec::Vec;
-    use serde::{Deserialize, Serialize};
 
+    use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
     struct HexOrBytes(#[serde(with = "super")] [u8; 4]);

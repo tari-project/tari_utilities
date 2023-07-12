@@ -93,8 +93,8 @@ where T: DeserializeOwned + Serialize
 
 #[cfg(test)]
 mod test {
-    use alloc::boxed::Box;
-use alloc::string::ToString;
+    use alloc::{boxed::Box, string::ToString};
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

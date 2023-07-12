@@ -223,8 +223,9 @@ where T: Zeroize
 
 #[cfg(test)]
 mod tests {
+    use alloc::string::ToString;
+
     use super::*;
-use alloc::string::ToString;
     #[test]
     fn references() {
         // Check immutable reference

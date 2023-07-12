@@ -108,8 +108,9 @@ where
 
 #[cfg(test)]
 mod test {
+    use alloc::string::ToString;
+
     use super::*;
-use alloc::string::ToString;
     #[test]
     fn test_to_hex() {
         assert_eq!(to_hex(&[0, 0, 0, 0]), "00000000");

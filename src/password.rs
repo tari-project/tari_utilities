@@ -109,8 +109,9 @@ impl Serialize for SafePassword {
 
 #[cfg(test)]
 mod tests {
+    use alloc::string::ToString;
     use std::str::FromStr;
-use alloc::string::ToString;
+
     use super::SafePassword;
 
     #[test]
