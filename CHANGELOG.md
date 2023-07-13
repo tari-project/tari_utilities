@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/tari-project/tari_utilities/compare/v0.4.10...v0.5.0) (2023-07-13)
+
+
+### Features
+
+* ledger compatability ([#54](https://github.com/tari-project/tari_utilities/issues/54)) ([a232808](https://github.com/tari-project/tari_utilities/commit/a232808106c3c12e759b1c7a7bda4f62675a3594))
+
 ### [0.4.10](https://github.com/tari-project/tari_utilities/compare/v0.4.9...v0.4.10) (2022-11-23)
 
 
