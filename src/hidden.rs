@@ -26,13 +26,13 @@
 //! differentiation to avoid it being misused in an unintended context. This library provides a generic type and macro
 //! that can help.
 
-use std::{
+use alloc::boxed::Box;
+use core::{
     any::type_name,
     fmt,
     ops::{Deref, DerefMut},
 };
 
-use serde::Deserialize;
 use zeroize::Zeroize;
 
 /// This is a macro that produces a hidden type from an underlying data type.
@@ -157,8 +157,9 @@ macro_rules! hidden_type {
 /// clone.zeroize();
 /// assert_eq!(clone.reveal(), &[0u8; 32]);
 /// ```
-#[derive(Clone, Deserialize)]
-#[serde(transparent)]
+#[derive(Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct Hidden<T>
 where T: Zeroize
 {
@@ -222,8 +223,9 @@ where T: Zeroize
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use alloc::string::ToString;
 
+    use super::*;
     #[test]
     fn references() {
         // Check immutable reference

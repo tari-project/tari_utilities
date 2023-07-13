@@ -21,10 +21,11 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! A type for handling a passphrase safely.
+use alloc::{string::String, vec::Vec};
+use core::{fmt::Display, str::FromStr};
 
-use std::{error::Error, fmt::Display, str::FromStr};
-
-use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
+#[cfg(feature = "serde")]
+use serde::{ser::SerializeSeq, Serialize, Serializer};
 
 use crate::hidden::Hidden;
 
@@ -47,8 +48,9 @@ use crate::hidden::Hidden;
 ///     SafePassword::from("my secret passphrase".to_string()).reveal()
 /// );
 /// ```
-#[derive(Clone, Debug, Deserialize)]
-#[serde(transparent)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct SafePassword {
     passphrase: Hidden<Vec<u8>>,
 }
@@ -69,10 +71,8 @@ impl SafePassword {
 #[derive(Debug)]
 pub struct PasswordError;
 
-impl Error for PasswordError {}
-
 impl Display for PasswordError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "PasswordError")
     }
 }
@@ -95,6 +95,7 @@ impl<S: Into<String>> From<S> for SafePassword {
     }
 }
 
+#[cfg(feature = "serde")]
 impl Serialize for SafePassword {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer {
@@ -108,6 +109,7 @@ impl Serialize for SafePassword {
 
 #[cfg(test)]
 mod tests {
+    use alloc::string::ToString;
     use std::str::FromStr;
 
     use super::SafePassword;

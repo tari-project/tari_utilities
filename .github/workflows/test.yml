@@ -31,7 +31,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: lints
-          args: clippy
+          args: clippy --all-features
   build:
     name: build
     runs-on: ubuntu-latest
@@ -44,12 +44,44 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+      - name: toolchain thumbv8m.main-none-eabi
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: thumbv8m.main-none-eabi
+          override: true
       - uses: Swatinem/rust-cache@v1
       - name: cargo build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release
+          args: --release --all-features
+      - name: cargo build std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --no-default-features --features "std"
+      - name: cargo build std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --no-default-features --features "zero"
+      - name: cargo build std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --no-default-features --features "serialize"
+      - name: cargo build no default
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --no-default-features
+      - name: cargo build no default for non std target
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --no-default-features --target=thumbv8m.main-none-eabi"
   test:
     name: cargo test
     runs-on: ubuntu-latest
@@ -71,11 +103,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all-features
       - name: test/release
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release
+          args: --release --all-features
       - name: test/debug all features
         if: ${{ matrix.rust != 'stable' }}
         uses: actions-rs/cargo@v1

@@ -22,7 +22,8 @@
 #![allow(clippy::needless_range_loop)]
 //! Functions for conversion between integer and bit array.
 
-use std::mem;
+use alloc::vec::Vec;
+use core::mem;
 
 /// Converts a single input byte to 8 bits (little-endian).
 pub fn byte_to_bits(value: u8) -> [bool; 8] {

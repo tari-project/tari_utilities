@@ -25,7 +25,8 @@
 //! It stores bytes as hex for human readable formats and
 //! uses bytes for binary formats.
 
-use std::{fmt, marker::PhantomData};
+use alloc::string::{String, ToString};
+use core::{fmt, marker::PhantomData};
 
 use serde::{
     de::{Error, Visitor},
@@ -108,6 +109,7 @@ where T: ByteArray
 
 #[cfg(test)]
 mod tests {
+    use alloc::vec::Vec;
     use std::io::Write;
 
     use serde::{Deserialize, Serialize};

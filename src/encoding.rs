@@ -22,9 +22,11 @@
 
 //! A trait that handles [base58](https://crates.io/crates/base58-monero) encoding and decoding.
 
-use thiserror::Error;
+use alloc::string::{String, ToString};
 
-use crate::{ByteArray, ByteArrayError};
+use snafu::prelude::*;
+
+use crate::ByteArray;
 
 /// Trait for encoding/decoding to base58.
 pub trait Base58 {
@@ -37,20 +39,20 @@ pub trait Base58 {
 }
 
 /// Errors for trait Base58.
-#[derive(Debug, Error)]
+#[derive(Debug, Snafu)]
 #[allow(missing_docs)]
 pub enum Base58Error {
-    #[error("Byte array error: {0}")]
-    ByteArrayError(#[from] ByteArrayError),
-    #[error("Decode error: {0}")]
-    DecodeError(#[from] base58_monero::Error),
+    #[snafu(display("Byte array error: `{reason}'"))]
+    ByteArrayError { reason: String },
+    #[snafu(display("Decode error: `{reason}'"))]
+    DecodeError { reason: String },
 }
 
 impl<T: ByteArray> Base58 for T {
     fn from_base58(data: &str) -> Result<Self, Base58Error>
     where Self: Sized {
-        let bytes = base58_monero::decode(data)?;
-        Self::from_bytes(&bytes).map_err(Into::into)
+        let bytes = base58_monero::decode(data).map_err(|e| Base58Error::DecodeError { reason: e.to_string() })?;
+        Self::from_bytes(&bytes).map_err(|e| Base58Error::ByteArrayError { reason: e.to_string() })
     }
 
     fn to_base58(&self) -> String {
@@ -60,6 +62,8 @@ impl<T: ByteArray> Base58 for T {
 
 #[cfg(test)]
 mod test {
+    use alloc::vec::Vec;
+
     use rand::{rngs::OsRng, RngCore};
 
     use super::*;

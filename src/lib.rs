@@ -21,25 +21,41 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
+
+#![no_std]
+// This is to allow no_std use
+#[allow(unused_imports)]
+#[macro_use]
+extern crate alloc;
+
+#[cfg(any(feature = "std", feature = "test"))]
+#[macro_use]
+extern crate std;
+
 pub mod bit;
 pub mod byte_array;
 pub mod convert;
+#[cfg(feature = "std")]
 pub mod encoding;
+#[cfg(feature = "std")]
 pub mod epoch_time;
 pub mod fixed_set;
 pub mod hash;
 pub mod hex;
-#[macro_use]
+#[cfg(feature = "zeroize")]
 pub mod hidden;
 pub mod locks;
+#[cfg(feature = "serde")]
 pub mod message_format;
+#[cfg(feature = "zeroize")]
 pub mod password;
+#[cfg(feature = "std")]
 pub mod safe_array;
+#[cfg(feature = "serde")]
 pub mod serde;
-
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
     hash::Hashable,
-    hidden::Hidden,
-    password::SafePassword,
 };
+#[cfg(feature = "zeroize")]
+pub use self::{hidden::Hidden, password::SafePassword};
