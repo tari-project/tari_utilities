@@ -55,3 +55,29 @@ A `MessageFormat` trait that handles conversion from and to binary, json, or bas
 ## Hidden
 
 A wrapper type for concealing sensitive information in logs.
+
+Some of the utilities can be removed with feature flags:
+
+## std
+
+This will allow epoch_time, encoding and safe_array
+
+## zero
+
+This will include zeroize support
+
+## alloc
+
+This will include zeroize with alloc support
+
+## serialize
+
+This will include support for serde
+
+## borsh
+
+This will include support for borsh
+
+## default
+
+This will include all feature flags.

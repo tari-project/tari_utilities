@@ -28,16 +28,16 @@
 #[macro_use]
 extern crate alloc;
 
-#[cfg(any(feature = "epoch", feature = "test"))]
+#[cfg(any(feature = "std", feature = "test"))]
 #[macro_use]
 extern crate std;
 
 pub mod bit;
 pub mod byte_array;
 pub mod convert;
-#[cfg(feature = "monero")]
+#[cfg(feature = "std")]
 pub mod encoding;
-#[cfg(feature = "epoch")]
+#[cfg(feature = "std")]
 pub mod epoch_time;
 pub mod fixed_set;
 pub mod hash;
@@ -49,7 +49,7 @@ pub mod locks;
 pub mod message_format;
 #[cfg(feature = "zeroize")]
 pub mod password;
-#[cfg(feature = "subtle")]
+#[cfg(feature = "std")]
 pub mod safe_array;
 #[cfg(feature = "serde")]
 pub mod serde;

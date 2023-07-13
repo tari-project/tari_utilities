@@ -31,7 +31,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: lints
-          args: clippy
+          args: clippy --all-features
   build:
     name: build
     runs-on: ubuntu-latest
@@ -49,7 +49,27 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release
+          args: --release --all-features
+      - name: cargo build std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --features "std"
+      - name: cargo build std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --features "zeroize"
+      - name: cargo build std
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --features "serde"
+      - name: cargo build no default
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --no-default-features"
   test:
     name: cargo test
     runs-on: ubuntu-latest
@@ -71,11 +91,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all-features
       - name: test/release
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --release
+          args: --release --all-features
       - name: test/debug all features
         if: ${{ matrix.rust != 'stable' }}
         uses: actions-rs/cargo@v1
