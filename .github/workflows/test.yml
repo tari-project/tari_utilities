@@ -61,7 +61,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --features "std"
+          args: --release --no-default-features --features "std"
       - name: cargo build std
         uses: actions-rs/cargo@v1
         with:
