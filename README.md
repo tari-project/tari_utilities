@@ -55,7 +55,7 @@ A `MessageFormat` trait that handles conversion from and to binary, json, or bas
 ## Hidden
 
 A wrapper type for concealing sensitive information in logs.
-
+# Feature Flags
 Some of the utilities can be removed with feature flags:
 
 ## std
