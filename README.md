@@ -66,10 +66,6 @@ This will allow epoch_time, encoding and safe_array
 
 This will include zeroize support
 
-## alloc
-
-This will include zeroize with alloc support
-
 ## serialize
 
 This will include support for serde

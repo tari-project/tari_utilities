@@ -26,9 +26,8 @@ subtle = {version= "2.4", default-features =false, optional = true}
 rand = "0.8.0"
 
 [features]
-default = ["serialize", "std", "alloc", "zero"]
-std = ["subtle", "base58-monero"]
-zero = ["zeroize"]
-alloc = ["zeroize/alloc"]
+default = ["serialize", "std", "zero"]
+std = ["subtle", "base58-monero", "newtype-ops" ]
+zero = ["zeroize/alloc"]
 serialize = ["serde", "serde_json", "bincode", "base64", "newtype-ops"]
 borsh = ["dep:borsh"]

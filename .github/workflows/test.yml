@@ -66,12 +66,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --features "zeroize"
+          args: --release --no-default-features --features "zero"
       - name: cargo build std
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --features "serde"
+          args: --release --no-default-features --features "serialize"
       - name: cargo build no default
         uses: actions-rs/cargo@v1
         with:
