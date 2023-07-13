@@ -16,13 +16,6 @@ jobs:
           profile: minimal
           components: rustfmt, clippy
           override: true
-      - name: toolchain thumbv8m.main-none-eabi
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          target: thumbv8m.main-none-eabi
-          override: true
       - uses: Swatinem/rust-cache@v1
       - name: cargo fmt
         uses: actions-rs/cargo@v1
@@ -50,6 +43,13 @@ jobs:
         with:
           toolchain: stable
           profile: minimal
+          override: true
+      - name: toolchain thumbv8m.main-none-eabi
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: thumbv8m.main-none-eabi
           override: true
       - uses: Swatinem/rust-cache@v1
       - name: cargo build
