@@ -22,10 +22,11 @@
 
 //! A type for handling a passphrase safely.
 use alloc::{string::String, vec::Vec};
-use core::{fmt::Display, str::FromStr};
+use core::str::FromStr;
 
 #[cfg(feature = "serde")]
 use serde::{ser::SerializeSeq, Serialize, Serializer};
+use snafu::Snafu;
 
 use crate::hidden::Hidden;
 
@@ -68,14 +69,8 @@ impl SafePassword {
 }
 
 /// An error for parsing a password from a string
-#[derive(Debug)]
+#[derive(Debug, Snafu)]
 pub struct PasswordError;
-
-impl Display for PasswordError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "PasswordError")
-    }
-}
 
 impl FromStr for SafePassword {
     type Err = PasswordError;
