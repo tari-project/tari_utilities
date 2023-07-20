@@ -22,7 +22,7 @@
 
 //! A type for handling a passphrase safely.
 use alloc::{string::String, vec::Vec};
-use core::{fmt::Display, str::FromStr};
+use core::str::FromStr;
 
 #[cfg(feature = "serde")]
 use serde::{ser::SerializeSeq, Serialize, Serializer};
@@ -67,18 +67,8 @@ impl SafePassword {
     }
 }
 
-/// An error for parsing a password from a string
-#[derive(Debug)]
-pub struct PasswordError;
-
-impl Display for PasswordError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "PasswordError")
-    }
-}
-
 impl FromStr for SafePassword {
-    type Err = PasswordError;
+    type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self {
@@ -133,5 +123,44 @@ mod tests {
         let deser: SafePassword = serde_json::from_str(&ser).unwrap();
 
         assert_eq!(safe_password.reveal(), deser.reveal());
+    }
+
+    #[test]
+    // If the error type in `impl FromStr for SafePassword` is wrong, this test will fail to compile
+    fn use_with_clap_and_serde() {
+        use alloc::string::String;
+
+        use clap::Parser;
+        use serde::{Deserialize, Serialize};
+
+        fn deserialize_safe_password_option<'de, D>(deserializer: D) -> Result<Option<SafePassword>, D::Error>
+        where D: serde::Deserializer<'de> {
+            let password: Option<String> = Deserialize::deserialize(deserializer)?;
+            println!("Password: {:?}", password);
+            Ok(password.map(SafePassword::from))
+        }
+
+        #[derive(Parser, Serialize, Deserialize, Debug)]
+        #[clap(author, version, about, long_about = None)]
+        #[clap(propagate_version = true)]
+        struct Cli {
+            #[serde(deserialize_with = "deserialize_safe_password_option")]
+            #[clap(long, env = "MY_PASSWORD", hide_env_values = true)]
+            pub password: Option<SafePassword>,
+        }
+
+        let hex_password = "48656c6c6f20576f726c64";
+        let input = serde_json::json!({
+            "password": hex_password,
+        });
+
+        // Deserialize the JSON input into the Cli struct
+        let cli: Cli = serde_json::from_value(input).unwrap();
+
+        // Access the SafePassword field
+        if let Some(password) = cli.password {
+            let password_reveal = String::from_utf8(password.reveal().clone()).unwrap();
+            assert_eq!(hex_password.to_string(), password_reveal);
+        }
     }
 }
