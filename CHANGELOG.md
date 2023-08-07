@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/tari-project/tari_utilities/compare/v0.4.10...v0.5.1) (2023-08-02)
+
+
+### Features
+
+* removed password error for safe password  ([#58](https://github.com/tari-project/tari_utilities/issues/58)) ([c067263](https://github.com/tari-project/tari_utilities/commit/c06726322683c4671b93388b444d108103cd7b55))
+
 ## [0.5.0](https://github.com/tari-project/tari_utilities/compare/v0.4.10...v0.5.0) (2023-07-13)
 
 
