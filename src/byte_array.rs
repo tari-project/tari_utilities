@@ -57,13 +57,13 @@ pub trait ByteArray: Sized {
     /// Any failures (incorrect string length, etc) return an [ByteArrayError](enum.ByteArrayError.html) with an
     /// explanatory note.
     fn from_vec(v: &Vec<u8>) -> Result<Self, ByteArrayError> {
-        Self::from_bytes(v.as_slice())
+        Self::from_canonical_bytes(v.as_slice())
     }
 
     /// Try and convert the given byte array to the implemented type. Any failures (incorrect array length,
     /// implementation-specific checks, etc.) return a [ByteArrayError](enum.ByteArrayError.html) with an explanatory
     /// note.
-    fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError>;
+    fn from_canonical_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError>;
 
     /// Return the type as a byte array.
     fn as_bytes(&self) -> &[u8];
@@ -78,7 +78,7 @@ impl ByteArray for Vec<u8> {
         Ok(v.clone())
     }
 
-    fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
+    fn from_canonical_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
         Ok(bytes.to_vec())
     }
 
@@ -88,7 +88,7 @@ impl ByteArray for Vec<u8> {
 }
 
 impl<const I: usize> ByteArray for [u8; I] {
-    fn from_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
+    fn from_canonical_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
         if bytes.len() != I {
             return Err(ByteArrayError::IncorrectLength {});
         }
@@ -105,7 +105,7 @@ impl<const I: usize> ByteArray for [u8; I] {
 impl<T: ByteArray> Hex for T {
     fn from_hex(hex: &str) -> Result<Self, HexError> {
         let v = from_hex(hex)?;
-        Self::from_bytes(&v).map_err(|_| HexError::HexConversionError {})
+        Self::from_canonical_bytes(&v).map_err(|_| HexError::HexConversionError {})
     }
 
     fn to_hex(&self) -> String {
@@ -156,7 +156,7 @@ mod test {
 
     #[test]
     fn test_error_handling() {
-        let err = <[u8; 32]>::from_bytes(&[1, 2, 3, 4]).unwrap_err();
+        let err = <[u8; 32]>::from_canonical_bytes(&[1, 2, 3, 4]).unwrap_err();
         assert_eq!(err, ByteArrayError::IncorrectLength {});
 
         let err = <[u8; 32]>::from_hex("abcd").unwrap_err();
