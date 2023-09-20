@@ -29,7 +29,12 @@ use core::fmt::{LowerHex, Write};
 use serde::Serializer;
 use snafu::prelude::*;
 
+use crate::alloc::string::ToString;
+
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
+
+/// The max len of the hex
+const MAX_BYTES_SIZE: usize = 4096;
 pub trait Hex {
     /// Try to convert the given hexadecimal string to the type.
     ///
@@ -55,12 +60,18 @@ pub enum HexError {
     HexConversionError {},
 }
 
-/// Encode the provided bytes into a hex string.
+/// Encode the provided bytes into a hex string. This will function will not fail, but will print out if it fails
 pub fn to_hex<T>(bytes: &[T]) -> String
 where T: LowerHex {
+    if bytes.len() > MAX_BYTES_SIZE {
+        return "**String to large**".to_string();
+    }
     let mut s = String::with_capacity(bytes.len() * 2);
     for byte in bytes {
-        write!(&mut s, "{:02x}", byte).expect("Unable to write");
+        match write!(&mut s, "{:02x}", byte) {
+            Ok(_) => {},
+            Err(_) => return "**Bytes failed to convert**".to_string(),
+        }
     }
     s
 }
