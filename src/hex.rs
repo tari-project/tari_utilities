@@ -68,10 +68,8 @@ where T: LowerHex {
     }
     let mut s = String::with_capacity(bytes.len() * 2);
     for byte in bytes {
-        match write!(&mut s, "{:02x}", byte) {
-            Ok(_) => {},
-            Err(_) => return "**Bytes failed to convert**".to_string(),
-        }
+        let byte_string = format!("{:02x}", byte);
+        s.push_str(&byte_string);
     }
     s
 }
