@@ -23,7 +23,7 @@
 //! Functions for conversion between binary and hex string.
 
 use alloc::{string::String, vec::Vec};
-use core::fmt::{LowerHex, Write};
+use core::fmt::LowerHex;
 
 #[cfg(feature = "serde")]
 use serde::Serializer;
@@ -31,10 +31,12 @@ use snafu::prelude::*;
 
 use crate::alloc::string::ToString;
 
+/// Maximum bytes allowed for parsing to hex.
+const MAX_BYTES_SIZE: usize = 4096;
+
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
 
 /// The max len of the hex
-const MAX_BYTES_SIZE: usize = 4096;
 pub trait Hex {
     /// Try to convert the given hexadecimal string to the type.
     ///
