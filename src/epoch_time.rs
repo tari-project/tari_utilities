@@ -24,13 +24,11 @@
 
 use std::{
     fmt,
-    ops::Div,
     time::{SystemTime, UNIX_EPOCH},
 };
 
 #[cfg(feature = "borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
-use newtype_ops::newtype_ops;
 
 /// The timestamp, defined as the amount of seconds past from UNIX epoch.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
@@ -44,7 +42,7 @@ impl EpochTime {
         EpochTime(
             SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .expect("SystemTime before UNIX EPOCH!")
+                .unwrap_or_default()
                 .as_secs(),
         )
     }
@@ -59,17 +57,6 @@ impl EpochTime {
         self.0
     }
 
-    /// Return a new EpochTime increased by the amount of seconds given.
-    ///
-    /// # Panics
-    ///
-    /// It will panic if combined EpochTime and seconds are larger than U64::MAX.
-    #[must_use]
-    pub fn increase(self, seconds: u64) -> EpochTime {
-        let value = seconds.checked_add(self.0).expect("u64 overflow in timestamp");
-        EpochTime(value)
-    }
-
     /// Checked EpochTime addition. Computes self + other, returning None if overflow occurred.
     pub fn checked_add(self, other: EpochTime) -> Option<EpochTime> {
         self.0.checked_add(other.0).map(EpochTime)
@@ -80,24 +67,6 @@ impl EpochTime {
         self.0.checked_sub(other.0).map(EpochTime)
     }
 }
-
-// You can only add or subtract EpochTime from EpochTime
-newtype_ops! { [EpochTime] {add sub} {:=} Self Self }
-newtype_ops! { [EpochTime] {add sub} {:=} &Self &Self }
-newtype_ops! { [EpochTime] {add sub} {:=} Self &Self }
-
-// Multiplication and division of EpochTime by scalar is EpochTime
-newtype_ops! { [EpochTime] {mul div rem} {:=} Self u64 }
-
-// Division of EpochTime by EpochTime is a EpochTime ratio (scalar) (newtype_ops doesn't handle this case)
-impl Div for EpochTime {
-    type Output = u64;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        self.0 / rhs.0
-    }
-}
-
 impl fmt::Display for EpochTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
@@ -128,19 +97,6 @@ mod test {
     }
 
     #[test]
-    fn increase() {
-        let a = EpochTime::from(1111);
-        assert_eq!(a.increase(123), EpochTime::from(1234));
-    }
-
-    #[test]
-    #[should_panic]
-    fn increase_overflow() {
-        let a = EpochTime::from(1234);
-        let _ = a.increase(u64::MAX);
-    }
-
-    #[test]
     fn checked_add() {
         let a = EpochTime::from(1111);
         let b = EpochTime::from_secs_since_epoch(123);
@@ -158,21 +114,8 @@ mod test {
     }
 
     #[test]
-    fn test_div() {
-        let a = EpochTime::from(3639);
-        let b = EpochTime::from(3);
-        assert_eq!(1213, a / b);
-    }
-
-    #[test]
     fn display() {
         let time = EpochTime::from(1234567);
         assert_eq!("1234567", format!("{}", time));
-    }
-
-    #[test]
-    fn add_epoch_time() {
-        assert_eq!(EpochTime::from(1_000) + EpochTime::from(8_000), EpochTime::from(9_000));
-        assert_eq!(EpochTime::from(15) + EpochTime::from(5), EpochTime::from(20));
     }
 }
