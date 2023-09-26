@@ -23,13 +23,20 @@
 //! Functions for conversion between binary and hex string.
 
 use alloc::{string::String, vec::Vec};
-use core::fmt::{LowerHex, Write};
+use core::fmt::LowerHex;
 
 #[cfg(feature = "serde")]
 use serde::Serializer;
 use snafu::prelude::*;
 
+use crate::alloc::string::ToString;
+
+/// Maximum bytes allowed for parsing to hex.
+const MAX_BYTES_SIZE: usize = 4096;
+
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
+
+/// The max len of the hex
 pub trait Hex {
     /// Try to convert the given hexadecimal string to the type.
     ///
@@ -55,12 +62,16 @@ pub enum HexError {
     HexConversionError {},
 }
 
-/// Encode the provided bytes into a hex string.
+/// Encode the provided bytes into a hex string. This will function will not fail, but will print out if it fails
 pub fn to_hex<T>(bytes: &[T]) -> String
 where T: LowerHex {
+    if bytes.len() > MAX_BYTES_SIZE {
+        return "**String to large**".to_string();
+    }
     let mut s = String::with_capacity(bytes.len() * 2);
     for byte in bytes {
-        write!(&mut s, "{:02x}", byte).expect("Unable to write");
+        let byte_string = format!("{:02x}", byte);
+        s.push_str(&byte_string);
     }
     s
 }
@@ -146,6 +157,19 @@ mod test {
         assert!(matches!(err, HexError::LengthError {}));
         // Check that message is the doc message above
         assert_eq!(err.to_string(), "Hex string lengths must be a multiple of 2");
+    }
+
+    #[test]
+    fn max_length_error() {
+        let bytes = [0; 4096];
+        let mut hex = "".to_string();
+        for _ in 0..4096 {
+            hex.push_str("00");
+        }
+        assert_eq!(hex, bytes.to_hex());
+
+        let bytes = [0; 4097];
+        assert_eq!("**String to large**", bytes.to_hex());
     }
 
     #[test]

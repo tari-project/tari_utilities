@@ -91,6 +91,7 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
         }
         let mut iter = self.items.iter().filter_map(Option::as_ref);
         // Take the first item
+        // unwrap wont fail as we know there is a first item.
         let mut sum = iter.next().unwrap().clone();
         for v in iter {
             sum = &sum + v;
