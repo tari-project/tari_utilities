@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.6.0](https://github.com/tari-project/tari_utilities/compare/v0.5.1...v0.6.0) (2023-09-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Changes the `ByteArray` trait.
+
+* rename `from_bytes` to `from_canonical_bytes` ([#60](https://github.com/tari-project/tari_utilities/issues/60)) ([17684d4](https://github.com/tari-project/tari_utilities/commit/17684d458e5e9027a219af899cc441df92ee76a6))
+
 ### [0.5.1](https://github.com/tari-project/tari_utilities/compare/v0.4.10...v0.5.1) (2023-08-02)
 
 
