@@ -52,7 +52,7 @@ impl<T: ByteArray> Base58 for T {
     fn from_base58(data: &str) -> Result<Self, Base58Error>
     where Self: Sized {
         let bytes = base58_monero::decode(data).map_err(|e| Base58Error::DecodeError { reason: e.to_string() })?;
-        Self::from_bytes(&bytes).map_err(|e| Base58Error::ByteArrayError { reason: e.to_string() })
+        Self::from_canonical_bytes(&bytes).map_err(|e| Base58Error::ByteArrayError { reason: e.to_string() })
     }
 
     fn to_base58(&self) -> String {
