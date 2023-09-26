@@ -160,6 +160,19 @@ mod test {
     }
 
     #[test]
+    fn max_length_error() {
+        let bytes = [0; 4096];
+        let mut hex = "".to_string();
+        for _ in 0..4096 {
+            hex.push_str("00");
+        }
+        assert_eq!(hex, bytes.to_hex());
+
+        let bytes = [0; 4097];
+        assert_eq!("**String to large**", bytes.to_hex());
+    }
+
+    #[test]
     fn character_error() {
         let result = from_hex("1234567890ABCDEFG1");
         assert!(result.is_err());
