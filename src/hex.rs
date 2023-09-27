@@ -32,7 +32,7 @@ use snafu::prelude::*;
 use crate::alloc::string::ToString;
 
 /// Maximum bytes allowed for parsing to hex.
-const MAX_BYTES_SIZE: usize = 4096;
+const MAX_BYTES_SIZE: usize = 1_048_576; // 1MB
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
 
@@ -161,14 +161,14 @@ mod test {
 
     #[test]
     fn max_length_error() {
-        let bytes = [0; 4096];
+        let bytes = [0; 1_048_576];
         let mut hex = "".to_string();
-        for _ in 0..4096 {
+        for _ in 0..1_048_576 {
             hex.push_str("00");
         }
         assert_eq!(hex, bytes.to_hex());
 
-        let bytes = [0; 4097];
+        let bytes = [0; 1_048_577];
         assert_eq!("**String to large**", bytes.to_hex());
     }
 
