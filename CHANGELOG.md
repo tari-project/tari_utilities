@@ -4,11 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.6.1](https://github.com/tari-project/tari_utilities/compare/v0.5.1...v0.6.1) (2023-09-27)
 
-
-### ⚠ BREAKING CHANGES
-
-* Changes the `ByteArray` trait.
-
 ### Features
 
 * up hex limit ([#63](https://github.com/tari-project/tari_utilities/issues/63)) ([4c1381a](https://github.com/tari-project/tari_utilities/commit/4c1381a4a756fa2be5bd90cfedda6e71e5d541b1))
