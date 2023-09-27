@@ -2,8 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [0.6.0](https://github.com/tari-project/tari_utilities/compare/v0.5.1...v0.6.0) (2023-09-26)
+### [0.6.1](https://github.com/tari-project/tari_utilities/compare/v0.6.0...v0.6.1) (2023-09-27)
 
+### Features
+
+* up hex limit ([#63](https://github.com/tari-project/tari_utilities/issues/63)) ([4c1381a](https://github.com/tari-project/tari_utilities/commit/4c1381a4a756fa2be5bd90cfedda6e71e5d541b1))
+
+## [0.6.0](https://github.com/tari-project/tari_utilities/compare/v0.5.1...v0.6.0) (2023-09-26)
 
 ### ⚠ BREAKING CHANGES
 
