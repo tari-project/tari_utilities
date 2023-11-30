@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+### [0.6.2](https://github.com/tari-project/tari_utilities/compare/v0.6.1...v0.6.2) (2023-11-30)
+
+### Features
+
+* upgrade borsch to official release 1.2
 
 ### [0.6.1](https://github.com/tari-project/tari_utilities/compare/v0.6.0...v0.6.1) (2023-09-27)
 
