@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
-### [0.6.2](https://github.com/tari-project/tari_utilities/compare/v0.6.1...v0.6.2) (2023-11-30)
+### [0.7.0](https://github.com/tari-project/tari_utilities/compare/v0.6.1...v0.7.0) (2023-12-06)
 
 ### Features
 
