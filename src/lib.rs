@@ -21,6 +21,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
+//! This is a test comment.
 
 #![no_std]
 // This is to allow no_std use
