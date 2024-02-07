@@ -132,7 +132,7 @@ impl<T, const N: usize> PartialEq for SafeArray<T, N>
 where T: ConstantTimeEq
 {
     fn eq(&self, other: &Self) -> bool {
-        self.ct_eq(other).unwrap_u8() == 1u8
+        self.ct_eq(other).into()
     }
 }
 
