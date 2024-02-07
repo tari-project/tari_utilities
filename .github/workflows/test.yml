@@ -7,117 +7,57 @@ jobs:
     name: clippy
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install components
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-          profile: minimal
-          components: rustfmt, clippy
-          override: true
-      - uses: Swatinem/rust-cache@v1
-      - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-      - name: install cargo lints
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-lints
-      - name: cargo lints clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: lints
-          args: clippy --all-features
+          components: clippy, rustfmt
+      - name: Check formatting
+        run: cargo +nightly fmt --all -- --check
+      - name: Install linter
+        run: cargo install cargo-lints
+      - name: Run linter
+        run: cargo +stable lints clippy --all-targets --all-features
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install components
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
-          profile: minimal
-          override: true
-      - name: toolchain thumbv8m.main-none-eabi
-        uses: actions-rs/toolchain@v1
+      - name: Install components (metal)
+        uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
-          toolchain: nightly
-          target: thumbv8m.main-none-eabi
-          override: true
-      - uses: Swatinem/rust-cache@v1
-      - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --all-features
-      - name: cargo build std
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --no-default-features --features "std"
-      - name: cargo build std
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --no-default-features --features "zero"
-      - name: cargo build std
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --no-default-features --features "serialize"
-      - name: cargo build no default
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --no-default-features
-      - name: cargo build no default for non std target
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --no-default-features --target=thumbv8m.main-none-eabi"
+          toolchain: stable
+          targets: thumbv8m.main-none-eabi
+      - name: Build (release, all features)
+        run: cargo +stable build --release --all-features
+      - name: Build (release, std)
+        run: cargo +stable build --release --no-default-features --features "std"
+      - name: Build (release, serialize)
+        run: cargo +stable build --release --no-default-features --features "serialize"
+      - name: Build (release, borsh)
+        run: cargo +stable build --release --no-default-features --features "borsh"
+      - name: Build (release, no features)
+        run: cargo +stable build --release --no-default-features
+      - name: Build (release, no features, metal)
+        run: cargo +stable build --release --no-default-features --target=thumbv8m.main-none-eabi
   test:
     name: cargo test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - stable
-          - nightly
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install components
+        uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
-      - name: test/debug
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
-      - name: test/release
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release --all-features
-      - name: test/debug all features
-        if: ${{ matrix.rust != 'stable' }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
-      - name: test/release all features
-        if: ${{ matrix.rust != 'stable' }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release --all-features
+          toolchain: stable
+      - name: Test (debug, all features)
+        run: cargo +stable test --all-features
+      - name: Test (release, all features)
+        run: cargo +stable test --release --all-features

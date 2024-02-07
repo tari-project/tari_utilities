@@ -64,7 +64,7 @@ impl<T: ByteArray> Base58 for T {
 mod test {
     use alloc::vec::Vec;
 
-    use rand::{rngs::OsRng, RngCore};
+    use rand_core::{OsRng, RngCore};
 
     use super::*;
 
