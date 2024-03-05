@@ -3,25 +3,25 @@ on:
   push:
     branches:
       - main
+env:
+  RUSTUP_TOOLCHAIN: "stable"
 jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y jq lcov
       - name: Download Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly
-          override: true
+          toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
           components: llvm-tools-preview
-      - name: Install llvm-tools
+      - name: Install requirements for code coverage
         run: |
-          rustup component add llvm-tools-preview
           cargo install cargo-binutils
           cargo install rustfilt
       - name: Run test coverage
