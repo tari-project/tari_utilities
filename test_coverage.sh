@@ -10,11 +10,14 @@
 # 5. genhtml
 # $ sudo apt install lcov
 
-RUSTFLAGS="-Z instrument-coverage"
-LLVM_PROFILE_FILE="./cov_raw/tari_utilities-%m.profraw"
+RUSTFLAGS="-C instrument-coverage"
+RUSTUP_TOOLCHAIN=${RUSTUP_TOOLCHAIN:-stable}
+DEST=tari_utilities
+echo "Using ${RUSTUP_TOOLCHAIN} toolchain"
+LLVM_PROFILE_FILE="./cov_raw/${DEST}-%m.profraw"
 
 get_binaries() {
-  files=$( RUSTFLAGS=$RUSTFLAGS cargo test --tests --no-run --message-format=json \
+  files=$( RUSTFLAGS=$RUSTFLAGS cargo +${RUSTUP_TOOLCHAIN} test --tests --no-run --message-format=json \
               | jq -r "select(.profile.test == true) | .filenames[]" \
               | grep -v dSYM - \
         );
@@ -23,13 +26,15 @@ get_binaries() {
 
 get_binaries
 
+echo "** Generating ..."
+echo ${files}
 # Remove old coverage files
-rm cov_raw/*profraw cov_raw/tari_utilities.profdata cov_raw/tari_utilities.lcov cov_raw/tari_utilities.txt
+rm -fr cov_raw coverage_report default*.profraw
 
-RUSTFLAGS=$RUSTFLAGS LLVM_PROFILE_FILE=$LLVM_PROFILE_FILE cargo test --tests
+RUSTFLAGS=$RUSTFLAGS LLVM_PROFILE_FILE=${LLVM_PROFILE_FILE} cargo +${RUSTUP_TOOLCHAIN} test --tests
 
 cargo profdata -- \
-  merge -sparse ./cov_raw/tari_utilities-*.profraw -o ./cov_raw/tari_utilities.profdata
+  merge -sparse ./cov_raw/${DEST}-*.profraw -o ./cov_raw/${DEST}.profdata
 
 cargo cov -- \
   export \
@@ -38,11 +43,12 @@ cargo cov -- \
     --show-branch-summary \
     --show-instantiation-summary \
     --show-region-summary \
-    --ignore-filename-regex='/.cargo/registry' \
-    --ignore-filename-regex="^/rustc" \
-    --instr-profile=cov_raw/tari_utilities.profdata \
+    --ignore-filename-regex='\.cargo' \
+    --ignore-filename-regex="rustc" \
+    --ignore-filename-regex="\.git" \
+    --instr-profile=cov_raw/${DEST}.profdata \
     $files \
-    > cov_raw/tari_utilities.lcov
+    > cov_raw/${DEST}.lcov
 
 cargo cov -- \
   show \
@@ -50,14 +56,15 @@ cargo cov -- \
     --show-branch-summary \
     --show-instantiation-summary \
     --show-region-summary \
-    --ignore-filename-regex='/.cargo/registry' \
-    --ignore-filename-regex="^/rustc" \
-    --instr-profile=cov_raw/tari_utilities.profdata \
+    --ignore-filename-regex='\.cargo' \
+    --ignore-filename-regex="rustc" \
+    --ignore-filename-regex="\.git" \
+    --instr-profile=cov_raw/${DEST}.profdata \
     $files \
-    > cov_raw/tari_utilities.txt
+    > cov_raw/${DEST}.txt
 
 if [ -z ${SKIP_HTML+x} ]; then
-  genhtml -o coverage_report cov_raw/tari_utilities.lcov
+  genhtml -o coverage_report cov_raw/${DEST}.lcov
 else
   echo "Skipping html generation"
 fi
