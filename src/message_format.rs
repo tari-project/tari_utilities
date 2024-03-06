@@ -24,9 +24,7 @@
 
 use alloc::{string::String, vec::Vec};
 
-use base64;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use serde_json;
 use snafu::prelude::*;
 
 /// Errors for [MessageFormat] trait.
