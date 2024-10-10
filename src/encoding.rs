@@ -29,6 +29,7 @@ use snafu::prelude::*;
 use crate::ByteArray;
 
 /// Trait for encoding/decoding to base58.
+#[deprecated(since = "0.8.0", note = "please use `MBase58` instead")]
 pub trait Base58 {
     /// Convert from base58 string.
     fn from_base58(hex: &str) -> Result<Self, Base58Error>
@@ -60,6 +61,40 @@ impl<T: ByteArray> Base58 for T {
     }
 }
 
+/// Trait for encoding/decoding to base58.
+pub trait MBase58 {
+    /// Convert from base58 string.
+    fn from_monero_base58(hex: &str) -> Result<Self, crate::encoding::Base58Error>
+    where Self: Sized;
+
+    /// Convert to base58 string.
+    fn to_monero_base58(&self) -> String;
+}
+
+/// Errors for trait Base58.
+#[derive(Debug, Snafu)]
+#[allow(missing_docs)]
+pub enum MBase58Error {
+    #[snafu(display("Byte array error: `{reason}'"))]
+    ByteArrayError { reason: String },
+    #[snafu(display("Decode error: `{reason}'"))]
+    DecodeError { reason: String },
+}
+
+impl<T: ByteArray> crate::encoding::MBase58 for T {
+    fn from_monero_base58(data: &str) -> Result<Self, crate::encoding::Base58Error>
+    where Self: Sized {
+        let bytes = base58_monero::decode(data)
+            .map_err(|e| crate::encoding::Base58Error::DecodeError { reason: e.to_string() })?;
+        Self::from_canonical_bytes(&bytes)
+            .map_err(|e| crate::encoding::Base58Error::ByteArrayError { reason: e.to_string() })
+    }
+
+    fn to_monero_base58(&self) -> String {
+        base58_monero::encode(self.as_bytes()).expect("base58_monero::encode is infallible")
+    }
+}
+
 #[cfg(test)]
 mod test {
     use alloc::vec::Vec;
@@ -70,22 +105,22 @@ mod test {
 
     #[test]
     fn decoding() {
-        assert_eq!(Vec::from_base58("111111").unwrap(), vec![0; 4]);
-        assert_eq!(Vec::from_base58("11115Q").unwrap(), vec![0, 0, 0, 255]);
-        assert!(Vec::from_base58("11111O").is_err());
-        assert!(Vec::from_base58("🖖🥴").is_err());
+        assert_eq!(Vec::from_monero_base58("111111").unwrap(), vec![0; 4]);
+        assert_eq!(Vec::from_monero_base58("11115Q").unwrap(), vec![0, 0, 0, 255]);
+        assert!(Vec::from_monero_base58("11111O").is_err());
+        assert!(Vec::from_monero_base58("🖖🥴").is_err());
     }
 
     #[test]
     fn encoding() {
-        assert_eq!(vec![0; 4].to_base58(), "111111");
-        assert_eq!(vec![0, 2, 250, 39].to_base58(), "111zzz");
+        assert_eq!(vec![0; 4].to_monero_base58(), "111111");
+        assert_eq!(vec![0, 2, 250, 39].to_monero_base58(), "111zzz");
     }
 
     #[test]
     fn inverse_operations() {
         let mut bytes = vec![0; 10];
         OsRng.fill_bytes(&mut bytes);
-        assert_eq!(Vec::from_base58(&bytes.to_base58()).unwrap(), bytes);
+        assert_eq!(Vec::from_monero_base58(&bytes.to_base58()).unwrap(), bytes);
     }
 }
