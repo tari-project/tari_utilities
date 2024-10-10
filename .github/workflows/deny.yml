@@ -7,21 +7,13 @@ jobs:
     name: deny
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install components
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-          profile: minimal
-      - uses: Swatinem/rust-cache@v1
-      - name: install cargo deny
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-deny
-      - name: cargo deny check
-        uses: actions-rs/cargo@v1
-        with:
-          command: deny
-          args: check
+      - name: Install deny
+        run: cargo install cargo-deny
+      - name: Run deny
+        run: cargo deny check

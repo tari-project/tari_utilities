@@ -42,20 +42,17 @@ pub mod epoch_time;
 pub mod fixed_set;
 pub mod hash;
 pub mod hex;
-#[cfg(feature = "zeroize")]
 pub mod hidden;
 pub mod locks;
 #[cfg(feature = "serde")]
 pub mod message_format;
-#[cfg(feature = "zeroize")]
 pub mod password;
-#[cfg(feature = "std")]
 pub mod safe_array;
 #[cfg(feature = "serde")]
 pub mod serde;
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
     hash::Hashable,
+    hidden::Hidden,
+    password::SafePassword,
 };
-#[cfg(feature = "zeroize")]
-pub use self::{hidden::Hidden, password::SafePassword};

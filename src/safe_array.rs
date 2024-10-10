@@ -29,7 +29,6 @@ use core::{
 };
 
 use subtle::ConstantTimeEq;
-#[cfg(feature = "zeroize")]
 use zeroize::Zeroize;
 
 /// Sometimes it is not good that an array be used for a cryptographic key.
@@ -49,8 +48,8 @@ use zeroize::Zeroize;
 ///
 /// ```edition2018
 /// # #[macro_use] extern crate tari_utilities;
-/// # use rand::rngs::OsRng;
-/// # use rand::RngCore;
+/// # use rand_core::OsRng;
+/// # use rand_core::RngCore;
 /// # use tari_utilities::{hidden_type, hidden::Hidden, safe_array::SafeArray};
 /// # use zeroize::Zeroize;
 /// # fn main() {
@@ -102,7 +101,6 @@ impl<T, const N: usize> DerefMut for SafeArray<T, N> {
     }
 }
 
-#[cfg(feature = "zeroize")]
 impl<T, const N: usize> Zeroize for SafeArray<T, N>
 where T: Zeroize
 {
@@ -142,7 +140,7 @@ mod tests {
 
     #[test]
     fn reference() {
-        use rand::{rngs::OsRng, RngCore};
+        use rand_core::{OsRng, RngCore};
         use zeroize::Zeroize;
 
         use crate::{hidden::Hidden, hidden_type};
