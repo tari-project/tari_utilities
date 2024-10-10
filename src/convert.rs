@@ -51,6 +51,6 @@ mod test {
 
     #[test]
     fn convert_all_failed() {
-        assert!(try_convert_all::<_, u32, _>(vec![std::i64::MAX, 2, 3, 4, 5]).is_err());
+        assert!(try_convert_all::<_, u32, _>(vec![i64::MAX, 2, 3, 4, 5]).is_err());
     }
 }
