@@ -139,7 +139,7 @@ mod test {
         assert_eq!(from_hex("0x800000ff").unwrap(), vec![128, 0, 0, 255]);
         assert!(from_hex("800").is_err()); // Odd number of bytes
         assert!(from_hex("8080gf").is_err()); // Invalid hex character g
-                                              // unicode strings have odd lengths and can cause panics
+        // unicode strings have odd lengths and can cause panics
         assert!(from_hex("🖖🥴").is_err());
     }
 

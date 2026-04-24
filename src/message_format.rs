@@ -24,7 +24,7 @@
 
 use alloc::{string::String, vec::Vec};
 
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use snafu::prelude::*;
 
 /// Errors for [MessageFormat] trait.
