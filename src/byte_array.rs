@@ -26,7 +26,7 @@ use alloc::{string::String, vec::Vec};
 
 use snafu::prelude::*;
 
-use crate::hex::{from_hex, to_hex, Hex, HexError};
+use crate::hex::{Hex, HexError, from_hex, to_hex};
 
 /// Errors for [ByteArray] trait.
 #[derive(Debug, Snafu, PartialEq, Eq)]

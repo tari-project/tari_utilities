@@ -25,7 +25,7 @@ use alloc::{string::String, vec::Vec};
 use core::str::FromStr;
 
 #[cfg(feature = "serde")]
-use serde::{ser::SerializeSeq, Serialize, Serializer};
+use serde::{Serialize, Serializer, ser::SerializeSeq};
 
 use crate::hidden::Hidden;
 

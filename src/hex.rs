@@ -35,7 +35,6 @@ use crate::alloc::string::ToString;
 const MAX_BYTES_SIZE: usize = 262_144; // 256kb
 
 /// Any object implementing this trait has the ability to represent itself as a hexadecimal string and convert from it.
-
 /// The max len of the hex
 pub trait Hex {
     /// Try to convert the given hexadecimal string to the type.
@@ -99,12 +98,14 @@ pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     } else {
         hex_trim
     };
-    let num_bytes = hex_trim.len() / 2;
-    let mut result = vec![0u8; num_bytes];
-    for i in 0..num_bytes {
-        result[i] = u8::from_str_radix(&hex_trim[2 * i..2 * (i + 1)], 16).map_err(|_| HexError::InvalidCharacter {})?;
-    }
-    Ok(result)
+    hex_trim
+        .as_bytes()
+        .chunks(2)
+        .map(|chunk| {
+            let pair = core::str::from_utf8(chunk).map_err(|_| HexError::InvalidCharacter {})?;
+            u8::from_str_radix(pair, 16).map_err(|_| HexError::InvalidCharacter {})
+        })
+        .collect()
 }
 
 /// Use a serde serializer to serialize the hex string of the given object.
@@ -138,7 +139,7 @@ mod test {
         assert_eq!(from_hex("0x800000ff").unwrap(), vec![128, 0, 0, 255]);
         assert!(from_hex("800").is_err()); // Odd number of bytes
         assert!(from_hex("8080gf").is_err()); // Invalid hex character g
-                                              // unicode strings have odd lengths and can cause panics
+        // unicode strings have odd lengths and can cause panics
         assert!(from_hex("🖖🥴").is_err());
     }
 

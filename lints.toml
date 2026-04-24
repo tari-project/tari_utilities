@@ -31,7 +31,7 @@ deny = [
     # 'clippy::inline_always',
     'let_underscore_drop',
     'clippy::let_unit_value',
-    'clippy::match_on_vec_items',
+    'clippy::indexing_slicing',
     'clippy::match_wild_err_arm',
     # 'clippy::similar_names',
     'clippy::needless_borrow',

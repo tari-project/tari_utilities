@@ -29,14 +29,14 @@ use alloc::string::{String, ToString};
 use core::{fmt, marker::PhantomData};
 
 use serde::{
-    de::{Error, Visitor},
     Deserializer,
     Serializer,
+    de::{Error, Visitor},
 };
 
 use crate::{
     byte_array::ByteArray,
-    hex::{from_hex, Hex},
+    hex::{Hex, from_hex},
 };
 
 /// Serializes a [`ByteArray`] to a hex string or a binary array.
