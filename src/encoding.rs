@@ -89,8 +89,6 @@ impl<T: ByteArray> crate::encoding::MBase58 for T {
 mod test {
     use alloc::vec::Vec;
 
-    use rand_core::{OsRng, RngCore};
-
     use super::*;
 
     #[test]
@@ -110,7 +108,7 @@ mod test {
     #[test]
     fn inverse_operations() {
         let mut bytes = vec![0; 10];
-        OsRng.fill_bytes(&mut bytes);
+        getrandom::fill(&mut bytes).unwrap();
         assert_eq!(Vec::from_monero_base58(&bytes.to_monero_base58()).unwrap(), bytes);
     }
 }

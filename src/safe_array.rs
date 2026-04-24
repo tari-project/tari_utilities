@@ -48,8 +48,6 @@ use zeroize::Zeroize;
 ///
 /// ```edition2018
 /// # #[macro_use] extern crate tari_utilities;
-/// # use rand_core::OsRng;
-/// # use rand_core::RngCore;
 /// # use tari_utilities::{hidden_type, hidden::Hidden, safe_array::SafeArray};
 /// # use zeroize::Zeroize;
 /// # fn main() {
@@ -63,8 +61,7 @@ use zeroize::Zeroize;
 /// assert_eq!(key.reveal().as_ref(), &[0u8; 32]);
 ///
 /// // Fill the key with random data, which requires `&mut [u8]`
-/// let mut rng = OsRng;
-/// rng.fill_bytes(key.reveal_mut());
+/// getrandom::fill(key.reveal_mut()).unwrap();
 /// }
 /// ```
 #[derive(Clone, Debug)]
@@ -140,7 +137,6 @@ mod tests {
 
     #[test]
     fn reference() {
-        use rand_core::{OsRng, RngCore};
         use zeroize::Zeroize;
 
         use crate::{hidden::Hidden, hidden_type};
@@ -157,8 +153,7 @@ mod tests {
 
         // Test mutable reference access
         let mut key_c = CipherKey::from(SafeArray::<u8, 32>::default());
-        let mut rng = OsRng;
-        rng.fill_bytes(key_c.reveal_mut());
+        getrandom::fill(key_c.reveal_mut()).unwrap();
         assert_ne!(key_c.reveal().as_ref(), &[0u8; 32]);
     }
 

@@ -28,20 +28,15 @@ use core::mem;
 /// Converts a single input byte to 8 bits (little-endian).
 pub fn byte_to_bits(value: u8) -> [bool; 8] {
     let mut bits = [false; 8];
-    for i in 0..8 {
-        bits[i] = value & (1 << i) != 0;
+    for (i, bit) in bits.iter_mut().enumerate() {
+        *bit = value & (1 << i) != 0;
     }
     bits
 }
 
 /// Converts a vector of input bytes to a vector of bits
 pub fn bytes_to_bits(bytes: &[u8]) -> Vec<bool> {
-    let mut bits: Vec<bool> = vec![false; bytes.len() * 8];
-    for i in 0..bytes.len() {
-        let bit_index = i * 8;
-        bits[bit_index..(bit_index + 8)].copy_from_slice(&byte_to_bits(bytes[i]));
-    }
-    bits
+    bytes.iter().flat_map(|byte| byte_to_bits(*byte)).collect()
 }
 
 /// Converts a vector of input bits (little-endian) to its integer representation
@@ -54,8 +49,8 @@ pub fn checked_bits_to_uint(bits: &[bool]) -> Option<usize> {
         None
     } else {
         let mut value: usize = 0;
-        for i in 0..bits.len() {
-            value |= usize::from(bits[i]) << i;
+        for (i, bit) in bits.iter().enumerate() {
+            value |= usize::from(*bit) << i;
         }
         Some(value)
     }

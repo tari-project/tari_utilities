@@ -44,11 +44,13 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
 
     /// Set the `index`-th item to `val`. Any existing item is overwritten. The set takes ownership of `val`.
     pub fn set_item(&mut self, index: usize, val: T) -> bool {
-        if index >= self.items.len() {
-            return false;
+        match self.items.get_mut(index) {
+            Some(slot) => {
+                *slot = Some(val);
+                true
+            },
+            None => false,
         }
-        self.items[index] = Some(val);
-        true
     }
 
     /// Return a reference to the `index`-th item, or `None` if that item has not been set yet.
@@ -61,8 +63,8 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
 
     /// Delete an item from the set by setting the `index`-th value to `None`.
     pub fn clear_item(&mut self, index: usize) {
-        if index < self.items.len() {
-            self.items[index] = None;
+        if let Some(slot) = self.items.get_mut(index) {
+            *slot = None;
         }
     }
 
