@@ -6,7 +6,7 @@ repository = "https://github.com/tari-project/tari"
 homepage = "https://tari.com"
 readme = "README.md"
 license = "BSD-3-Clause"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2024"
 
 [dependencies]
@@ -23,7 +23,7 @@ zeroize = { version ="1.3", default-features = false, features = ["alloc", "zero
 subtle = { version = "2.4", default-features = false }
 
 [dev-dependencies]
-getrandom = { version = "0.3", default-features = false, features = ["std"] }
+getrandom = { version = "0.4", default-features = false, features = ["std"] }
 clap = { version = "4.5", default-features = false, features = ["derive", "env", "std"] }
 
 [features]
