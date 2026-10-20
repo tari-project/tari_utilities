@@ -81,6 +81,9 @@ impl<T: Clone + PartialEq + Default> FixedSet<T> {
     }
 
     /// Produces the sum of the values in the set, provided the set is full.
+    ///
+    /// The sum uses `T`'s `+` operator with no extra overflow checking, so for primitive integers an overflow wraps
+    /// or panics depending on the build's overflow-checks setting.
     pub fn sum(&self) -> Option<T>
     where for<'a> &'a T: Add<&'a T, Output = T> {
         // This function uses HTRB to work: See https://doc.rust-lang.org/nomicon/hrtb.html

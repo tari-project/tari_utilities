@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.11.0](https://github.com/tari-project/tari_utilities/compare/v0.10.0...v0.11.0) (2026-10-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* feat!: `Hex::to_hex`, `hex::to_hex` and `hex::to_hex_multiple` return `Result<_, HexError>`; input over 256 KiB returns `HexError::TooLarge` instead of the `"**String to large**"` sentinel. `hex::to_hex` takes `&[u8]`. Use `to_hex_trimmed` for infallible display output.
+* feat!: hex decoding rejects `+`/`-` signs and any non `[0-9a-fA-F]` character; `HexError` messages changed.
+* feat!: `SafePassword` serializes as the string `"<redacted>"` and never as plaintext; the redacted marker can't be deserialized.
+* feat!: `SafePassword::reveal_mut` returns `&mut [u8]`.
+* feat!: `MessageFormat::from_binary` rejects trailing bytes and input over `MAX_BINARY_SIZE` (4 MiB); `from_base64` applies the same limit. `MessageFormat` has a new `from_binary_with_limit` method.
+* feat!: `MessageFormat::from_json` rejects trailing non-whitespace data.
+* feat!: `SafeArray<T, N>` requires `T: Zeroize`, zeroizes on drop and no longer prints its contents in `Debug`.
+
+### Features
+
+* Branch-free hex encoder and decoder; new `hex::from_hex_canonical` (lowercase only, no trimming or `0x` prefix) and `to_hex_trimmed`.
+* Decoding temporaries (hex, base58, base64, `SafePassword`) are zeroized.
+* `Hidden<T>` has a manual `Deserialize` impl; residual unzeroized copies during deserialization are documented.
+* `EpochTime::try_now`.
+* Lock macros log through a re-exported `log`, so callers no longer need their own `log` dependency.
+
+### Documentation
+
+* Lock macros: a poisoned value may be partially updated; it is not rolled back.
+* `FixedSet::sum` may wrap or panic on overflow for primitive integers.
+* Recursive types must not be decoded from untrusted binary input.
+
+### CI
+
+* Actions pinned to commit SHAs, least-privilege `permissions`, `rustsec/audit-check` replaces `actions-rs/audit-check`, tool installs are `--locked` and versioned.
+* `cargo deny` denies yanked crates and unknown registries/git sources.
+
 ## [0.8.0](https://github.com/tari-project/tari_utilities/compare/v0.7...v0.8.0) (2024-10-10)
 
 

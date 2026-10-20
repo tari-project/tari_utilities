@@ -25,8 +25,9 @@
 use alloc::{string::String, vec::Vec};
 
 use snafu::prelude::*;
+use zeroize::Zeroizing;
 
-use crate::hex::{Hex, HexError, from_hex, to_hex};
+use crate::hex::{Hex, HexError, from_hex, to_hex, to_hex_trimmed};
 
 /// Errors for [ByteArray] trait.
 #[derive(Debug, Snafu, PartialEq, Eq)]
@@ -104,12 +105,16 @@ impl<const I: usize> ByteArray for [u8; I] {
 
 impl<T: ByteArray> Hex for T {
     fn from_hex(hex: &str) -> Result<Self, HexError> {
-        let v = from_hex(hex)?;
+        let v = Zeroizing::new(from_hex(hex)?);
         Self::from_canonical_bytes(&v).map_err(|_| HexError::HexConversionError {})
     }
 
-    fn to_hex(&self) -> String {
+    fn to_hex(&self) -> Result<String, HexError> {
         to_hex(self.as_bytes())
+    }
+
+    fn to_hex_trimmed(&self) -> String {
+        to_hex_trimmed(self.as_bytes())
     }
 }
 
@@ -151,7 +156,10 @@ mod test {
     #[test]
     fn from_to_hex() {
         let v = <Vec<u8>>::from_hex("deadbeef").unwrap();
-        assert_eq!(v.to_hex(), "deadbeef");
+        assert_eq!(v.to_hex().unwrap(), "deadbeef");
+        assert_eq!(v.to_hex_trimmed(), "deadbeef");
+        let v = <[u8; 4]>::from_hex("DEADBEEF").unwrap();
+        assert_eq!(v, [0xde, 0xad, 0xbe, 0xef]);
     }
 
     #[test]

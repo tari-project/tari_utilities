@@ -38,13 +38,19 @@ pub struct EpochTime(u64);
 
 impl EpochTime {
     /// Return UTC current as EpochTime.
+    ///
+    /// Returns `EpochTime(0)` if the system clock is set before the UNIX epoch, and panics in debug builds in that
+    /// case. Use [EpochTime::try_now] to handle that case explicitly.
     pub fn now() -> EpochTime {
-        EpochTime(
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap_or_default()
-                .as_secs(),
-        )
+        let now = Self::try_now();
+        debug_assert!(now.is_some(), "System clock is set before the UNIX epoch");
+        now.unwrap_or(EpochTime(0))
+    }
+
+    /// Return UTC current as EpochTime, or `None` if the system clock is set before the UNIX epoch.
+    pub fn try_now() -> Option<EpochTime> {
+        let elapsed = SystemTime::now().duration_since(UNIX_EPOCH).ok()?;
+        Some(EpochTime(elapsed.as_secs()))
     }
 
     /// Creates a new EpochTime representing the number of seconds since the unix epoch (1970-01-01 00:00:00 UTC).
@@ -88,6 +94,9 @@ mod test {
         let a = EpochTime::now();
         let b = EpochTime::now();
         assert!(a <= b);
+        let c = EpochTime::try_now().unwrap();
+        assert!(b <= c);
+        assert!(c.as_u64() > 0);
     }
 
     #[test]

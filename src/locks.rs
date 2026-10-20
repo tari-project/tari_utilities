@@ -22,14 +22,17 @@
 
 //! Macros for RwLock.
 
-/// Recovers a poisoned lock by returning the value before the lock was poisoned
+/// Recovers a poisoned lock by returning the guard anyway.
+///
+/// The protected value is left as it was when the panic occurred, which may be partially updated. It is not rolled
+/// back.
 #[macro_export]
 macro_rules! recover_lock {
     ($e:expr) => {
         match $e {
             Ok(lock) => lock,
             Err(poisoned) => {
-                log::warn!(target: "tari_util", "Lock has been POISONED and will be silently recovered");
+                $crate::log::warn!(target: "tari_util", "Lock has been POISONED and will be silently recovered");
                 poisoned.into_inner()
             },
         }
@@ -37,8 +40,9 @@ macro_rules! recover_lock {
 }
 
 /// This macro returns a Mutex or RwLock guard without returning a `PoisonError`.
-/// If the lock is poisoned (i.e. a panic before a MutexGuard / RwLockGuard is dropped), the last value before the panic
-/// occurred is used. The semantics of this macro are similar to a database transaction rollback on failure.
+/// If the lock is poisoned (i.e. a panic before a MutexGuard / RwLockGuard is dropped), a warning is logged and the
+/// guard is returned anyway. The value is whatever state the panicking thread left it in, which may be partially
+/// updated; this is NOT a rollback, so callers must not rely on the value being consistent after a poisoning panic.
 #[macro_export]
 macro_rules! acquire_lock {
     ($e:expr, $m:ident) => {
@@ -63,4 +67,35 @@ macro_rules! acquire_read_lock {
     ($e:expr) => {
         $crate::acquire_lock!($e, read)
     };
+}
+
+#[cfg(all(test, feature = "std"))]
+mod test {
+    use std::{
+        sync::{Mutex, RwLock},
+        thread,
+    };
+
+    #[test]
+    fn poisoned_lock_keeps_partial_update() {
+        let lock = Mutex::new(vec![1, 2]);
+        thread::scope(|s| {
+            let result = s
+                .spawn(|| {
+                    let mut guard = lock.lock().unwrap();
+                    guard.push(3);
+                    panic!("poison the lock");
+                })
+                .join();
+            assert!(result.is_err());
+        });
+        assert!(lock.is_poisoned());
+        // The partial update survives; nothing is rolled back
+        assert_eq!(*acquire_lock!(lock), vec![1, 2, 3]);
+
+        let rw = RwLock::new(1);
+        assert_eq!(*acquire_read_lock!(rw), 1);
+        *acquire_write_lock!(rw) = 2;
+        assert_eq!(*acquire_read_lock!(rw), 2);
+    }
 }

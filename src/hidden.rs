@@ -129,7 +129,9 @@ macro_rules! hidden_type {
 /// If it does, avoid dereferencing.
 ///
 /// Hidden data supports transparent deserialization, but you'll need to implement serialization yourself if you need
-/// it.
+/// it. Deserialized data is boxed immediately, but the value is first built on the stack and moved into the box; that
+/// moved-from stack copy can't be zeroized generically. Heap-backed types such as `Vec` may also leave unzeroized
+/// copies from reallocations during deserialization or on error paths; prefer `SafePassword` for passphrases.
 ///
 /// ```edition2018
 /// # use tari_utilities::hidden::Hidden;
@@ -158,8 +160,6 @@ macro_rules! hidden_type {
 /// assert_eq!(clone.reveal(), &[0u8; 32]);
 /// ```
 #[derive(Clone)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct Hidden<T>
 where T: Zeroize
 {
@@ -180,8 +180,21 @@ where T: Zeroize
     }
 
     /// Reveal the hidden data as a mutable reference
+    ///
+    /// Take care not to grow heap-backed data such as a `Vec` through this reference: a reallocation frees the old
+    /// buffer without zeroizing it.
     pub fn reveal_mut(&mut self) -> &mut T {
         self.inner.deref_mut()
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de, T> serde::Deserialize<'de> for Hidden<T>
+where T: Zeroize + serde::Deserialize<'de>
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        Ok(Self::hide(T::deserialize(deserializer)?))
     }
 }
 
@@ -248,6 +261,9 @@ mod tests {
 
         let deser: Hidden<u8> = serde_json::from_str(&ser).unwrap();
         assert_eq!(hidden.reveal(), deser.reveal());
+
+        let deser: Hidden<[u8; 4]> = bincode::deserialize(&[1, 2, 3, 4]).unwrap();
+        assert_eq!(deser.reveal(), &[1, 2, 3, 4]);
     }
 
     #[test]

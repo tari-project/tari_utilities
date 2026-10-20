@@ -24,12 +24,13 @@
 
 use alloc::vec::Vec;
 use core::{
-    fmt::Debug,
+    any::type_name,
+    fmt,
     ops::{Deref, DerefMut},
 };
 
 use subtle::ConstantTimeEq;
-use zeroize::Zeroize;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// Sometimes it is not good that an array be used for a cryptographic key.
 ///
@@ -41,6 +42,7 @@ use zeroize::Zeroize;
 /// It also supports `Deref` and `DerefMut` with `[T]` targets.
 /// Further, you get `Default` for handy instantiation, as well as `Clone`.
 /// It automatically handles equality checking in constant time.
+/// The contents are zeroized when dropped, and `Debug` output does not include them.
 ///
 /// Under the hood, it's just `Vec<T>`, but don't tell anybody.
 ///
@@ -64,27 +66,36 @@ use zeroize::Zeroize;
 /// getrandom::fill(key.reveal_mut()).unwrap();
 /// }
 /// ```
-#[derive(Clone, Debug)]
-pub struct SafeArray<T, const N: usize>(Vec<T>);
+#[derive(Clone)]
+pub struct SafeArray<T, const N: usize>(Vec<T>)
+where T: Zeroize;
 
-impl<T, const N: usize> SafeArray<T, N> {
+impl<T, const N: usize> SafeArray<T, N>
+where T: Zeroize
+{
     /// The fixed number of elements
     pub const LEN: usize = N;
 }
 
-impl<T, const N: usize> AsRef<[T]> for SafeArray<T, N> {
+impl<T, const N: usize> AsRef<[T]> for SafeArray<T, N>
+where T: Zeroize
+{
     fn as_ref(&self) -> &[T] {
         &self.0
     }
 }
 
-impl<T, const N: usize> AsMut<[T]> for SafeArray<T, N> {
+impl<T, const N: usize> AsMut<[T]> for SafeArray<T, N>
+where T: Zeroize
+{
     fn as_mut(&mut self) -> &mut [T] {
         &mut self.0
     }
 }
 
-impl<T, const N: usize> Deref for SafeArray<T, N> {
+impl<T, const N: usize> Deref for SafeArray<T, N>
+where T: Zeroize
+{
     type Target = [T];
 
     fn deref(&self) -> &Self::Target {
@@ -92,7 +103,9 @@ impl<T, const N: usize> Deref for SafeArray<T, N> {
     }
 }
 
-impl<T, const N: usize> DerefMut for SafeArray<T, N> {
+impl<T, const N: usize> DerefMut for SafeArray<T, N>
+where T: Zeroize
+{
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.0.deref_mut()
     }
@@ -107,7 +120,7 @@ where T: Zeroize
 }
 
 impl<T, const N: usize> Default for SafeArray<T, N>
-where T: Clone + Default
+where T: Clone + Default + Zeroize
 {
     fn default() -> Self {
         Self(vec![T::default(); N])
@@ -115,24 +128,45 @@ where T: Clone + Default
 }
 
 impl<T, const N: usize> ConstantTimeEq for SafeArray<T, N>
-where T: ConstantTimeEq
+where T: ConstantTimeEq + Zeroize
 {
     fn ct_eq(&self, other: &Self) -> subtle::Choice {
         self.0.ct_eq(&other.0)
     }
 }
 
-impl<T, const N: usize> Eq for SafeArray<T, N> where T: ConstantTimeEq {}
+impl<T, const N: usize> Eq for SafeArray<T, N> where T: ConstantTimeEq + Zeroize {}
 impl<T, const N: usize> PartialEq for SafeArray<T, N>
-where T: ConstantTimeEq
+where T: ConstantTimeEq + Zeroize
 {
     fn eq(&self, other: &Self) -> bool {
         self.ct_eq(other).into()
     }
 }
 
+impl<T, const N: usize> Drop for SafeArray<T, N>
+where T: Zeroize
+{
+    fn drop(&mut self) {
+        self.0.zeroize();
+    }
+}
+
+impl<T, const N: usize> ZeroizeOnDrop for SafeArray<T, N> where T: Zeroize {}
+
+/// Only output the type, keeping the contents hidden
+impl<T, const N: usize> fmt::Debug for SafeArray<T, N>
+where T: Zeroize
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "SafeArray<{}, {}>([REDACTED])", type_name::<T>(), N)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use core::cell::Cell;
+
     use super::*;
 
     #[test]
@@ -155,6 +189,33 @@ mod tests {
         let mut key_c = CipherKey::from(SafeArray::<u8, 32>::default());
         getrandom::fill(key_c.reveal_mut()).unwrap();
         assert_ne!(key_c.reveal().as_ref(), &[0u8; 32]);
+    }
+
+    #[test]
+    fn debug_is_redacted() {
+        let mut key = SafeArray::<u8, 32>::default();
+        key.copy_from_slice(&[0xab; 32]);
+        let debug = format!("{:?}", key);
+        assert_eq!(debug, "SafeArray<u8, 32>([REDACTED])");
+        assert!(!debug.contains("171"));
+    }
+
+    #[test]
+    fn zeroize_on_drop() {
+        fn assert_zeroize_on_drop<T: ZeroizeOnDrop>() {}
+        assert_zeroize_on_drop::<SafeArray<u8, 32>>();
+
+        struct Tracker<'a>(&'a Cell<usize>);
+        impl Zeroize for Tracker<'_> {
+            fn zeroize(&mut self) {
+                self.0.set(self.0.get() + 1);
+            }
+        }
+
+        let zeroized = Cell::new(0);
+        let key = SafeArray::<Tracker, 2>(vec![Tracker(&zeroized), Tracker(&zeroized)]);
+        drop(key);
+        assert_eq!(zeroized.get(), 2);
     }
 
     #[test]
