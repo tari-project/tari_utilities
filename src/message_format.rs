@@ -22,13 +22,17 @@
 
 //! A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
 //!
-//! Binary decoding is limited to [MAX_BINARY_SIZE] bytes and rejects trailing bytes. The binary format is the same as
-//! `bincode::serialize` (bincode 1.x, fixed-int encoding).
+//! Binary decoding rejects input over [MAX_BINARY_SIZE] bytes and rejects trailing bytes. The binary format is the same
+//! as `bincode::serialize` (bincode 1.x, fixed-int encoding).
 //!
-//! Recursive types (e.g. a struct containing an `Option<Box<Self>>`) must not be decoded from untrusted input: bincode
-//! 1.x has no depth limit, so deeply nested input can overflow the stack even within the size limit. Likewise, types
-//! containing collections of zero-sized elements (e.g. `Vec<()>`) must not be decoded from untrusted input, since a
-//! small length prefix can make decoding loop for a very long time.
+//! The limit bounds the input size, not the memory or time used to decode it. These types must not be decoded from
+//! untrusted input:
+//! - recursive types (e.g. a struct containing an `Option<Box<Self>>`): bincode 1.x has no depth limit, so deeply
+//!   nested input can overflow the stack;
+//! - collections of zero-sized elements (e.g. `Vec<()>`): a small length prefix can make decoding loop for a very long
+//!   time;
+//! - collections whose elements are large in memory but small when encoded (e.g. `Vec<Option<LargeStruct>>`): 4 MiB of
+//!   input can allocate gigabytes.
 
 use alloc::{string::String, vec::Vec};
 
@@ -37,7 +41,7 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use snafu::prelude::*;
 use zeroize::Zeroizing;
 
-/// The maximum number of bytes `from_binary` and `from_base64` will decode (4 MiB).
+/// The maximum input size in bytes `from_binary` and `from_base64` accept (4 MiB). This limits input size, not memory.
 pub const MAX_BINARY_SIZE: u64 = 4 * 1024 * 1024;
 
 /// Errors for [MessageFormat] trait.
@@ -63,11 +67,13 @@ pub trait MessageFormat: Sized {
     /// Convert to base64.
     fn to_base64(&self) -> Result<String, MessageFormatError>;
 
-    /// Convert from binary. Input is limited to [MAX_BINARY_SIZE] bytes and trailing bytes are rejected.
+    /// Convert from binary. Input over [MAX_BINARY_SIZE] bytes and trailing bytes are rejected. The limit does not
+    /// bound decoded memory; see the module docs for types that must not be decoded from untrusted input.
     fn from_binary(msg: &[u8]) -> Result<Self, MessageFormatError> {
         Self::from_binary_with_limit(msg, MAX_BINARY_SIZE)
     }
-    /// Convert from binary, decoding at most `limit` bytes. Trailing bytes are rejected.
+    /// Convert from binary, rejecting input over `limit` bytes and trailing bytes. The limit does not bound decoded
+    /// memory.
     fn from_binary_with_limit(msg: &[u8], limit: u64) -> Result<Self, MessageFormatError>;
     /// Convert from json. Trailing whitespace is allowed, any other trailing data is rejected.
     fn from_json(msg: &str) -> Result<Self, MessageFormatError>;
@@ -93,7 +99,7 @@ where T: DeserializeOwned + Serialize
 
     fn from_binary_with_limit(msg: &[u8], limit: u64) -> Result<Self, MessageFormatError> {
         // Checked up front because bincode 1.3's `Options::deserialize` replaces any `with_limit` with no limit for
-        // slice input; a slice decoder can't read past the slice, so this bounds decoding the same way
+        // slice input; a slice decoder can't read past the slice, so this gives the same bound on bytes read
         if msg.len() as u64 > limit {
             return Err(MessageFormatError::BinaryDeserializeError {});
         }

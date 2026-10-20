@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file. See [standa
 * feat!: hex decoding rejects `+`/`-` signs and any non `[0-9a-fA-F]` character; `HexError` messages changed.
 * feat!: serializing a `SafePassword` always returns an error, so the passphrase is never written out. It still deserializes from a byte sequence.
 * feat!: `SafePassword::reveal_mut` returns `&mut [u8]`.
-* feat!: `MessageFormat::from_binary` rejects trailing bytes and input over `MAX_BINARY_SIZE` (4 MiB); `from_base64` applies the same limit. `MessageFormat` has a new `from_binary_with_limit` method.
+* feat!: `MessageFormat::from_binary` rejects trailing bytes and input over `MAX_BINARY_SIZE` (4 MiB); `from_base64` applies the same limit. The limit bounds input size, not decoded memory. `MessageFormat` has a new `from_binary_with_limit` method.
 * feat!: `MessageFormat::from_json` rejects trailing non-whitespace data.
 * feat!: `SafeArray<T, N>` requires `T: Zeroize`, zeroizes on drop and no longer prints its contents in `Debug`.
 
