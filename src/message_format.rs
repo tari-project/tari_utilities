@@ -92,7 +92,8 @@ where T: DeserializeOwned + Serialize
     }
 
     fn from_binary_with_limit(msg: &[u8], limit: u64) -> Result<Self, MessageFormatError> {
-        // bincode ignores `with_limit` when decoding from a slice, so the limit is enforced on the input length
+        // Checked up front because bincode 1.3's `Options::deserialize` replaces any `with_limit` with no limit for
+        // slice input; a slice decoder can't read past the slice, so this bounds decoding the same way
         if msg.len() as u64 > limit {
             return Err(MessageFormatError::BinaryDeserializeError {});
         }

@@ -30,6 +30,8 @@ use alloc::{string::String, vec::Vec};
 use serde::{Serializer, ser::Error};
 use snafu::prelude::*;
 use zeroize::Zeroize;
+#[cfg(feature = "serde")]
+use zeroize::Zeroizing;
 
 use crate::alloc::string::ToString;
 
@@ -53,7 +55,8 @@ pub trait Hex {
     fn to_hex(&self) -> Result<String, HexError>;
 
     /// Return a hexadecimal representation for display or logging purposes. This never fails: values that are too large
-    /// to encode are truncated and end with a marker that is not valid hex.
+    /// to encode are truncated and end with a marker that is not valid hex. Like `to_hex`, it must not be used to log
+    /// secret key material.
     fn to_hex_trimmed(&self) -> String {
         self.to_hex().unwrap_or_else(|_| "…(too large)".to_string())
     }
@@ -90,14 +93,18 @@ pub fn to_hex(bytes: &[u8]) -> Result<String, HexError> {
 }
 
 /// Encode the provided bytes into a lowercase hex string for display or logging purposes. Input larger than 256 KiB
-/// is truncated, and the output ends with a marker like `…(+123 bytes)` that is not valid hex.
+/// is truncated, and the output ends with a marker like `…(+123 bytes)` that is not valid hex. Like `to_hex`, it must
+/// not be used to log secret key material.
 pub fn to_hex_trimmed(bytes: &[u8]) -> String {
     if bytes.len() <= MAX_BYTES_SIZE {
         return encode(bytes);
     }
     let (head, _) = bytes.split_at(MAX_BYTES_SIZE);
-    let mut s = encode(head);
-    s.push_str(&format!("…(+{} bytes)", bytes.len() - MAX_BYTES_SIZE));
+    let marker = format!("…(+{} bytes)", bytes.len() - MAX_BYTES_SIZE);
+    // Sized up front so appending the marker doesn't reallocate and leave an unwiped copy behind
+    let mut s = String::with_capacity(head.len() * 2 + marker.len());
+    encode_into(head, &mut s);
+    s.push_str(&marker);
     s
 }
 
@@ -113,10 +120,10 @@ pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Result<Vec<String>, HexError> {
     Ok(result)
 }
 
-/// Decode a hex string into bytes. Upper and lowercase digits are accepted, surrounding whitespace is trimmed and a
-/// lowercase `0x` prefix is removed.
+/// Decode a hex string into bytes. Upper and lowercase digits are accepted, surrounding ASCII whitespace is trimmed and
+/// a lowercase `0x` prefix is removed.
 pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
-    let hex_trim = hex_str.trim();
+    let hex_trim = hex_str.trim_matches(|c: char| c.is_ascii_whitespace());
     let hex_trim = hex_trim.strip_prefix("0x").unwrap_or(hex_trim);
     decode(hex_trim.as_bytes(), true)
 }
@@ -134,16 +141,21 @@ where
     S: Serializer,
     T: Hex,
 {
-    ser.serialize_str(&t.to_hex().map_err(S::Error::custom)?)
+    let hex = Zeroizing::new(t.to_hex().map_err(S::Error::custom)?);
+    ser.serialize_str(&hex)
 }
 
 fn encode(bytes: &[u8]) -> String {
     let mut s = String::with_capacity(bytes.len() * 2);
+    encode_into(bytes, &mut s);
+    s
+}
+
+fn encode_into(bytes: &[u8], s: &mut String) {
     for byte in bytes {
         s.push(encode_nibble(byte >> 4));
         s.push(encode_nibble(byte & 0x0f));
     }
-    s
 }
 
 // Maps 0..=15 to '0'..='9', 'a'..='f'. `(9 - n) >> 8` is all ones only when n > 9, which adds the gap to 'a'.
@@ -211,6 +223,14 @@ mod test {
         assert!(from_hex("8080gf").is_err()); // Invalid hex character g
         // unicode strings have odd lengths and can cause panics
         assert!(from_hex("🖖🥴").is_err());
+    }
+
+    #[test]
+    fn rejects_unicode_whitespace() {
+        assert!(from_hex("\u{00A0}dead").is_err());
+        assert!(from_hex("\u{3000}dead\u{2028}").is_err());
+        assert!(from_hex("\u{0085}dead").is_err());
+        assert_eq!(from_hex("\t\r\n dead \n").unwrap(), vec![0xde, 0xad]);
     }
 
     #[test]

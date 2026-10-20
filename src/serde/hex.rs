@@ -51,7 +51,8 @@ where
     T: ByteArray,
 {
     if ser.is_human_readable() {
-        ser.serialize_str(&data.to_hex().map_err(S::Error::custom)?)
+        let hex = Zeroizing::new(data.to_hex().map_err(S::Error::custom)?);
+        ser.serialize_str(&hex)
     } else {
         ser.serialize_bytes(data.as_bytes())
     }

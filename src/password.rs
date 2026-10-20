@@ -32,7 +32,8 @@ use serde::{
     Deserializer,
     Serialize,
     Serializer,
-    de::{Error, SeqAccess, Visitor},
+    de::{SeqAccess, Visitor},
+    ser::Error,
 };
 #[cfg(feature = "serde")]
 use zeroize::Zeroizing;
@@ -45,8 +46,8 @@ use crate::hidden::Hidden;
 /// The passphrase can be instantiated from a string or any type that can become a string.
 /// It is converted to a byte array, which can be accessed as a mutable or immutable reference.
 ///
-/// It deserializes from a sequence of bytes. It never serializes the passphrase: serializing produces the string
-/// `"<redacted>"`, which cannot be deserialized back into a `SafePassword`.
+/// It deserializes from a sequence of bytes. It can't be serialized: serializing always returns an error, so the
+/// passphrase is never written out.
 ///
 /// ```edition2018
 /// # use tari_utilities::SafePassword;
@@ -96,19 +97,15 @@ impl<S: Into<String>> From<S> for SafePassword {
     }
 }
 
-/// The string emitted in place of the passphrase when serializing.
-#[cfg(feature = "serde")]
-const REDACTED: &str = "<redacted>";
-
 /// The upper bound on the up-front allocation taken from an untrusted length hint when deserializing.
 #[cfg(feature = "serde")]
 const MAX_PREALLOCATION: usize = 4096;
 
 #[cfg(feature = "serde")]
 impl Serialize for SafePassword {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer {
-        serializer.serialize_str(REDACTED)
+        Err(S::Error::custom("SafePassword can't be serialized"))
     }
 }
 
@@ -144,10 +141,6 @@ impl<'de> Visitor<'de> for PasswordVisitor {
             }
             buf.push(byte);
         }
-        // Non self-describing formats (e.g. bincode) would otherwise read the redacted marker back as a passphrase
-        if buf.as_slice() == REDACTED.as_bytes() {
-            return Err(A::Error::custom("a redacted SafePassword can't be deserialized"));
-        }
         Ok(SafePassword {
             passphrase: Hidden::hide(core::mem::take(&mut *buf)),
         })
@@ -174,16 +167,22 @@ mod tests {
     }
 
     #[test]
-    fn serialization_is_redacted() {
+    fn serialization_fails_closed() {
         let safe_password = SafePassword::from("password");
-        let ser = serde_json::to_string(&safe_password).unwrap();
-        assert_eq!(ser, "\"<redacted>\"");
-        assert!(!ser.contains("password"));
-        assert!(serde_json::from_str::<SafePassword>(&ser).is_err());
+        let err = serde_json::to_string(&safe_password).unwrap_err();
+        assert!(err.to_string().contains("SafePassword can't be serialized"));
+        assert!(bincode::serialize(&safe_password).is_err());
 
-        let bin = bincode::serialize(&safe_password).unwrap();
-        assert!(!bin.windows(8).any(|w| w == b"password"));
-        assert!(bincode::deserialize::<SafePassword>(&bin).is_err());
+        #[derive(serde::Serialize)]
+        struct Config {
+            password: Option<SafePassword>,
+        }
+        let config = Config { password: None };
+        assert_eq!(serde_json::to_string(&config).unwrap(), "{\"password\":null}");
+        let config = Config {
+            password: Some(safe_password),
+        };
+        assert!(serde_json::to_string(&config).is_err());
     }
 
     #[test]
