@@ -29,13 +29,12 @@ db-urls = ["https://github.com/rustsec/advisory-db"]
 # The lint level for security vulnerabilities
 
 # The lint level for crates that have been yanked from their source registry
-yanked = "warn"
+yanked = "deny"
 
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
 ignore = [
-    #"RUSTSEC-0000-0000",
-    "RUSTSEC-2025-0141", #// this is for bincode thats unmaintained
+    { id = "RUSTSEC-2025-0141", reason = "bincode 1.x is unmaintained but kept for wire compatibility with stored data; decoding uses hardened options" },
 ]
 # Threshold for security vulnerabilities, any vulnerability with a CVSS score
 # lower than the range specified will be ignored. Note that ignored advisories
@@ -146,10 +145,10 @@ skip-tree = [
 [sources]
 # Lint level for what to happen when a crate from a crate registry that is not
 # in the allow list is encountered
-unknown-registry = "warn"
+unknown-registry = "deny"
 # Lint level for what to happen when a crate from a git repository that is not
 # in the allow list is encountered
-unknown-git = "warn"
+unknown-git = "deny"
 # List of URLs for allowed crate registries. Defaults to the crates.io index
 # if not specified. If it is specified but empty, no registries are allowed.
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]

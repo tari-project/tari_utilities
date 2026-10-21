@@ -25,14 +25,19 @@
 //! It stores bytes as hex for human readable formats and
 //! uses bytes for binary formats.
 
-use alloc::string::{String, ToString};
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::{fmt, marker::PhantomData};
 
 use serde::{
     Deserializer,
     Serializer,
     de::{Error, Visitor},
+    ser::Error as _,
 };
+use zeroize::Zeroizing;
 
 use crate::{
     byte_array::ByteArray,
@@ -46,7 +51,8 @@ where
     T: ByteArray,
 {
     if ser.is_human_readable() {
-        ser.serialize_str(&data.to_hex())
+        let hex = Zeroizing::new(data.to_hex().map_err(S::Error::custom)?);
+        ser.serialize_str(&hex)
     } else {
         ser.serialize_bytes(data.as_bytes())
     }
@@ -87,13 +93,20 @@ where T: ByteArray
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where E: Error {
-        let bytes = from_hex(v).map_err(|e| E::custom(e.to_string()))?;
+        let bytes = Zeroizing::new(from_hex(v).map_err(|e| E::custom(e.to_string()))?);
         self.visit_bytes(&bytes)
     }
 
     fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
     where E: Error {
+        let v = Zeroizing::new(v);
         self.visit_str(&v)
+    }
+
+    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+    where E: Error {
+        let v = Zeroizing::new(v);
+        self.visit_bytes(&v)
     }
 
     fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
@@ -109,7 +122,7 @@ where T: ByteArray
 
 #[cfg(test)]
 mod tests {
-    use alloc::vec::Vec;
+    use alloc::{string::ToString, vec::Vec};
     use std::io::Write;
 
     use serde::{Deserialize, Serialize};
@@ -124,6 +137,25 @@ mod tests {
         assert_eq!(serde_json::to_string(&hex_or_bytes).unwrap(), expected);
         let restored: HexOrBytes = serde_json::from_str(expected).unwrap();
         assert_eq!(hex_or_bytes, restored);
+    }
+
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+    struct HexOrBytesVec(#[serde(with = "super")] Vec<u8>);
+
+    #[test]
+    fn serialize_too_large_is_an_error() {
+        let big = HexOrBytesVec(vec![0u8; 262_145]);
+        let err = serde_json::to_string(&big).unwrap_err();
+        assert!(err.to_string().contains("262144"));
+        // Binary formats are not limited
+        assert!(bincode::serialize(&big).is_ok());
+    }
+
+    #[test]
+    fn deserialize_uppercase_and_reject_sign() {
+        let restored: HexOrBytes = serde_json::from_str("\"010203FF\"").unwrap();
+        assert_eq!(restored, HexOrBytes([1, 2, 3, 255]));
+        assert!(serde_json::from_str::<HexOrBytes>("\"+1020304\"").is_err());
     }
 
     #[test]

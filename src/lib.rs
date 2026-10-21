@@ -50,6 +50,10 @@ pub mod password;
 pub mod safe_array;
 #[cfg(feature = "serde")]
 pub mod serde;
+// Re-exported so the lock macros work without callers depending on `log`
+#[doc(hidden)]
+pub use log;
+
 pub use self::{
     byte_array::{ByteArray, ByteArrayError},
     hash::Hashable,

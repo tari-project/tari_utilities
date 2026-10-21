@@ -25,6 +25,7 @@
 use alloc::string::{String, ToString};
 
 use snafu::prelude::*;
+use zeroize::Zeroizing;
 
 use crate::ByteArray;
 
@@ -53,7 +54,9 @@ pub enum Base58Error {
 impl<T: ByteArray> Base58 for T {
     fn from_base58(data: &str) -> Result<Self, Base58Error>
     where Self: Sized {
-        let bytes = base58_monero::decode(data).map_err(|e| Base58Error::DecodeError { reason: e.to_string() })?;
+        let bytes = Zeroizing::new(
+            base58_monero::decode(data).map_err(|e| Base58Error::DecodeError { reason: e.to_string() })?,
+        );
         Self::from_canonical_bytes(&bytes).map_err(|e| Base58Error::ByteArrayError { reason: e.to_string() })
     }
 
@@ -75,7 +78,9 @@ pub trait MBase58 {
 impl<T: ByteArray> crate::encoding::MBase58 for T {
     fn from_monero_base58(data: &str) -> Result<Self, Base58Error>
     where Self: Sized {
-        let bytes = base58_monero::decode(data).map_err(|e| Base58Error::DecodeError { reason: e.to_string() })?;
+        let bytes = Zeroizing::new(
+            base58_monero::decode(data).map_err(|e| Base58Error::DecodeError { reason: e.to_string() })?,
+        );
         Self::from_canonical_bytes(&bytes)
             .map_err(|e| crate::encoding::Base58Error::ByteArrayError { reason: e.to_string() })
     }
