@@ -123,9 +123,207 @@ where T: ByteArray
 #[cfg(test)]
 mod tests {
     use alloc::{string::ToString, vec::Vec};
-    use std::io::Write;
 
-    use serde::{Deserialize, Serialize};
+    use serde::{
+        Deserialize,
+        Deserializer,
+        Serialize,
+        Serializer,
+        de::{Error as _, Visitor, value::Error as ValueError},
+    };
+
+    struct BinarySerializer;
+
+    impl Serializer for BinarySerializer {
+        type Error = ValueError;
+        type Ok = Vec<u8>;
+        type SerializeMap = serde::ser::Impossible<Self::Ok, Self::Error>;
+        type SerializeSeq = serde::ser::Impossible<Self::Ok, Self::Error>;
+        type SerializeStruct = serde::ser::Impossible<Self::Ok, Self::Error>;
+        type SerializeStructVariant = serde::ser::Impossible<Self::Ok, Self::Error>;
+        type SerializeTuple = serde::ser::Impossible<Self::Ok, Self::Error>;
+        type SerializeTupleStruct = serde::ser::Impossible<Self::Ok, Self::Error>;
+        type SerializeTupleVariant = serde::ser::Impossible<Self::Ok, Self::Error>;
+
+        fn is_human_readable(&self) -> bool {
+            false
+        }
+
+        fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
+            Ok(v.to_vec())
+        }
+
+        fn serialize_newtype_struct<T: ?Sized + Serialize>(
+            self,
+            _name: &'static str,
+            value: &T,
+        ) -> Result<Self::Ok, Self::Error> {
+            value.serialize(self)
+        }
+
+        fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_i8(self, _v: i8) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_i16(self, _v: i16) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_i32(self, _v: i32) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_i64(self, _v: i64) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_u8(self, _v: u8) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_u16(self, _v: u16) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_u32(self, _v: u32) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_u64(self, _v: u64) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_f32(self, _v: f32) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_f64(self, _v: f64) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_char(self, _v: char) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_str(self, _v: &str) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_some<T: ?Sized + Serialize>(self, _value: &T) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_unit_variant(
+            self,
+            _name: &'static str,
+            _variant_index: u32,
+            _variant: &'static str,
+        ) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_newtype_variant<T: ?Sized + Serialize>(
+            self,
+            _name: &'static str,
+            _variant_index: u32,
+            _variant: &'static str,
+            _value: &T,
+        ) -> Result<Self::Ok, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_tuple_struct(
+            self,
+            _name: &'static str,
+            _len: usize,
+        ) -> Result<Self::SerializeTupleStruct, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_tuple_variant(
+            self,
+            _name: &'static str,
+            _variant_index: u32,
+            _variant: &'static str,
+            _len: usize,
+        ) -> Result<Self::SerializeTupleVariant, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct, Self::Error> {
+            unimplemented!()
+        }
+
+        fn serialize_struct_variant(
+            self,
+            _name: &'static str,
+            _variant_index: u32,
+            _variant: &'static str,
+            _len: usize,
+        ) -> Result<Self::SerializeStructVariant, Self::Error> {
+            unimplemented!()
+        }
+    }
+
+    struct BinaryDeserializer<'de>(&'de [u8]);
+
+    impl<'de> Deserializer<'de> for BinaryDeserializer<'de> {
+        type Error = ValueError;
+
+        serde::forward_to_deserialize_any! {
+            bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+            byte_buf option unit unit_struct seq tuple
+            tuple_struct map struct enum identifier ignored_any
+        }
+
+        fn is_human_readable(&self) -> bool {
+            false
+        }
+
+        fn deserialize_any<V: Visitor<'de>>(self, _visitor: V) -> Result<V::Value, Self::Error> {
+            Err(ValueError::custom("unexpected deserialize_any"))
+        }
+
+        fn deserialize_bytes<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
+            visitor.visit_borrowed_bytes(self.0)
+        }
+
+        fn deserialize_newtype_struct<V: Visitor<'de>>(
+            self,
+            _name: &'static str,
+            visitor: V,
+        ) -> Result<V::Value, Self::Error> {
+            visitor.visit_newtype_struct(self)
+        }
+    }
 
     #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
     struct HexOrBytes(#[serde(with = "super")] [u8; 4]);
@@ -148,7 +346,7 @@ mod tests {
         let err = serde_json::to_string(&big).unwrap_err();
         assert!(err.to_string().contains("262144"));
         // Binary formats are not limited
-        assert!(bincode::serialize(&big).is_ok());
+        assert!(big.serialize(BinarySerializer).is_ok());
     }
 
     #[test]
@@ -161,11 +359,9 @@ mod tests {
     #[test]
     fn check_serde_hex_binary() {
         let hex_or_bytes = HexOrBytes([1, 2, 3, 255]);
-        let mut expected: Vec<u8> = Vec::new();
-        expected.write_all(&hex_or_bytes.0.len().to_le_bytes()).unwrap();
-        expected.write_all(&[1, 2, 3, 255]).unwrap();
-        assert_eq!(bincode::serialize(&hex_or_bytes).unwrap(), expected);
-        let restored: HexOrBytes = bincode::deserialize(&expected).unwrap();
+        let expected: Vec<u8> = vec![1, 2, 3, 255];
+        assert_eq!(hex_or_bytes.serialize(BinarySerializer).unwrap(), expected);
+        let restored = HexOrBytes::deserialize(BinaryDeserializer(&expected)).unwrap();
         assert_eq!(hex_or_bytes, restored);
     }
 }

@@ -50,7 +50,7 @@ Macros for RwLock.
 
 ## message_format
 
-A `MessageFormat` trait that handles conversion from and to binary, json, or base64.
+A `MessageFormat` trait that handles conversion from and to json or base64.
 
 ## Hidden
 
