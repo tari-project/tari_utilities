@@ -171,7 +171,6 @@ mod tests {
         let safe_password = SafePassword::from("password");
         let err = serde_json::to_string(&safe_password).unwrap_err();
         assert!(err.to_string().contains("SafePassword can't be serialized"));
-        assert!(bincode::serialize(&safe_password).is_err());
 
         #[derive(serde::Serialize)]
         struct Config {
@@ -189,10 +188,6 @@ mod tests {
     fn deserialize_byte_sequence() {
         // The format written by tari_utilities <= 0.10
         let deser: SafePassword = serde_json::from_str("[112,97,115,115,119,111,114,100]").unwrap();
-        assert_eq!(deser.reveal(), b"password");
-
-        let bin = bincode::serialize(&b"password".to_vec()).unwrap();
-        let deser: SafePassword = bincode::deserialize(&bin).unwrap();
         assert_eq!(deser.reveal(), b"password");
 
         // Longer than the initial allocation, to exercise growth

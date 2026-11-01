@@ -262,7 +262,7 @@ mod tests {
         let deser: Hidden<u8> = serde_json::from_str(&ser).unwrap();
         assert_eq!(hidden.reveal(), deser.reveal());
 
-        let deser: Hidden<[u8; 4]> = bincode::deserialize(&[1, 2, 3, 4]).unwrap();
+        let deser: Hidden<[u8; 4]> = serde_json::from_str("[1,2,3,4]").unwrap();
         assert_eq!(deser.reveal(), &[1, 2, 3, 4]);
     }
 
