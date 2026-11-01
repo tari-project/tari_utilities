@@ -115,7 +115,7 @@ impl<T, const N: usize> Zeroize for SafeArray<T, N>
 where T: Zeroize
 {
     fn zeroize(&mut self) {
-        self.0.zeroize();
+        self.0.iter_mut().for_each(Zeroize::zeroize);
     }
 }
 
@@ -148,7 +148,7 @@ impl<T, const N: usize> Drop for SafeArray<T, N>
 where T: Zeroize
 {
     fn drop(&mut self) {
-        self.0.zeroize();
+        self.zeroize();
     }
 }
 
@@ -223,5 +223,20 @@ mod tests {
         const N: usize = 64;
         assert_eq!(SafeArray::<u8, N>::default().len(), N);
         assert_eq!(SafeArray::<u8, 64>::LEN, N);
+    }
+
+    #[test]
+    fn zeroize_preserves_fixed_len() {
+        let mut key = SafeArray::<u8, 32>::default();
+        key.copy_from_slice(&[0x5a; 32]);
+        assert_eq!(key.as_ref(), &[0x5a; 32]);
+
+        key.zeroize();
+        assert_eq!(key.len(), 32);
+        assert_eq!(key.as_ref(), &[0u8; 32]);
+
+        // Buffer remains usable as a 32-byte slice after in-place zeroization
+        key.copy_from_slice(&[0xa5; 32]);
+        assert_eq!(key.as_ref(), &[0xa5; 32]);
     }
 }
