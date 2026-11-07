@@ -26,7 +26,7 @@ use alloc::vec::Vec;
 use core::ops::Add;
 
 /// Data structure for fixed set of size _n_.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FixedSet<T> {
     items: Vec<Option<T>>,
 }

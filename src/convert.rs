@@ -31,8 +31,9 @@ where
     I: IntoIterator<Item = T>,
     T: TryInto<U>,
 {
+    const MAX_PREALLOC: usize = 4096;
     let iter = into_iter.into_iter();
-    let mut result = Vec::with_capacity(iter.size_hint().0);
+    let mut result = Vec::with_capacity(iter.size_hint().0.min(MAX_PREALLOC));
     for item in iter {
         result.push(item.try_into()?);
     }
