@@ -121,10 +121,13 @@ pub fn to_hex_multiple(bytearray: &[Vec<u8>]) -> Result<Vec<String>, HexError> {
 }
 
 /// Decode a hex string into bytes. Upper and lowercase digits are accepted, surrounding ASCII whitespace is trimmed and
-/// a lowercase `0x` prefix is removed.
+/// a `0x` or `0X` prefix is removed.
 pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, HexError> {
     let hex_trim = hex_str.trim_matches(|c: char| c.is_ascii_whitespace());
-    let hex_trim = hex_trim.strip_prefix("0x").unwrap_or(hex_trim);
+    let hex_trim = hex_trim
+        .strip_prefix("0x")
+        .or_else(|| hex_trim.strip_prefix("0X"))
+        .unwrap_or(hex_trim);
     decode(hex_trim.as_bytes(), true)
 }
 
@@ -217,6 +220,7 @@ mod test {
         assert_eq!(from_hex(" 0a0b0c0d  ").unwrap(), vec![10, 11, 12, 13]);
         assert_eq!(from_hex("000000ff").unwrap(), vec![0, 0, 0, 255]);
         assert_eq!(from_hex("0x800000ff").unwrap(), vec![128, 0, 0, 255]);
+        assert_eq!(from_hex("0X800000FF").unwrap(), vec![128, 0, 0, 255]);
         assert_eq!(from_hex("0A0b0C0D").unwrap(), vec![10, 11, 12, 13]);
         assert_eq!(from_hex("").unwrap(), Vec::<u8>::new());
         assert!(from_hex("800").is_err()); // Odd number of bytes
