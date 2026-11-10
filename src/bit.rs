@@ -23,7 +23,7 @@
 //! Functions for conversion between integer and bit array.
 
 use alloc::vec::Vec;
-use core::mem;
+use core::{convert::TryInto, mem};
 
 /// Converts a single input byte to 8 bits (little-endian).
 pub fn byte_to_bits(value: u8) -> [bool; 8] {
@@ -34,9 +34,28 @@ pub fn byte_to_bits(value: u8) -> [bool; 8] {
     bits
 }
 
+/// Converts 8 bits (little-endian) back into a single byte.
+pub fn bits_to_byte(bits: &[bool; 8]) -> u8 {
+    let mut value = 0u8;
+    for (i, bit) in bits.iter().enumerate() {
+        value |= u8::from(*bit) << i;
+    }
+    value
+}
+
 /// Converts a vector of input bytes to a vector of bits
 pub fn bytes_to_bits(bytes: &[u8]) -> Vec<bool> {
     bytes.iter().flat_map(|byte| byte_to_bits(*byte)).collect()
+}
+
+/// Converts a slice of little-endian bits back into bytes, returning `None` if `bits.len()` is not a multiple of 8.
+pub fn checked_bits_to_bytes(bits: &[bool]) -> Option<Vec<u8>> {
+    if (bits.len() & 7) != 0 {
+        return None;
+    }
+    bits.chunks(8)
+        .map(|chunk| chunk.try_into().ok().map(|arr: [bool; 8]| bits_to_byte(&arr)))
+        .collect()
 }
 
 /// Converts a vector of input bits (little-endian) to its integer representation
@@ -51,6 +70,21 @@ pub fn checked_bits_to_uint(bits: &[bool]) -> Option<usize> {
         let mut value: usize = 0;
         for (i, bit) in bits.iter().enumerate() {
             value |= usize::from(*bit) << i;
+        }
+        Some(value)
+    }
+}
+
+/// Converts a slice of input bits (little-endian) to a `u64`, returning `None` if `bits.len() > 64`.
+pub fn checked_bits_to_u64(bits: &[bool]) -> Option<u64> {
+    const U64_BITS: usize = u64::BITS as usize;
+
+    if bits.len() > U64_BITS {
+        None
+    } else {
+        let mut value: u64 = 0;
+        for (i, bit) in bits.iter().enumerate() {
+            value |= u64::from(*bit) << i;
         }
         Some(value)
     }
@@ -82,5 +116,28 @@ mod test {
         assert_eq!(uint, 257);
         let bits = [false; mem::size_of::<usize>() * 8 + 1];
         assert!(checked_bits_to_uint(&bits).is_none());
+    }
+
+    #[test]
+    pub fn test_bits_to_byte_and_bytes_roundtrip() {
+        for b in 0u8..=255 {
+            let bits = byte_to_bits(b);
+            assert_eq!(bits_to_byte(&bits), b);
+        }
+
+        let payload = [0u8, 1, 0x55, 0xaa, 127, 255];
+        let bits = bytes_to_bits(&payload);
+        assert_eq!(checked_bits_to_bytes(&bits).unwrap(), payload);
+        assert_eq!(checked_bits_to_bytes(&[]).unwrap(), Vec::<u8>::new());
+        assert!(checked_bits_to_bytes(&bits[..bits.len() - 1]).is_none());
+    }
+
+    #[test]
+    pub fn test_checked_bits_to_u64() {
+        assert_eq!(checked_bits_to_u64(&[]), Some(0));
+        let max_bits = [true; 64];
+        assert_eq!(checked_bits_to_u64(&max_bits), Some(u64::MAX));
+        let overflow_bits = [false; 65];
+        assert_eq!(checked_bits_to_u64(&overflow_bits), None);
     }
 }

@@ -41,7 +41,7 @@ pub trait Base58 {
 }
 
 /// Errors for trait Base58.
-#[derive(Debug, Snafu)]
+#[derive(Debug, Clone, Snafu, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub enum Base58Error {
     #[snafu(display("Byte array error: `{reason}'"))]
@@ -115,5 +115,19 @@ mod test {
         let mut bytes = vec![0; 10];
         getrandom::fill(&mut bytes).unwrap();
         assert_eq!(Vec::from_monero_base58(&bytes.to_monero_base58()).unwrap(), bytes);
+
+        let err = <[u8; 32]>::from_monero_base58("111111").unwrap_err();
+        assert_eq!(
+            err.clone(),
+            Base58Error::ByteArrayError {
+                reason: "The input data was the incorrect length to perform the desired conversion".to_string()
+            }
+        );
+
+        #[allow(deprecated)]
+        {
+            let b58 = bytes.to_base58();
+            assert_eq!(Vec::from_base58(&b58).unwrap(), bytes);
+        }
     }
 }
