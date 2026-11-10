@@ -22,7 +22,7 @@
 
 //! A trait that offers representation of data types as a byte array or hex string.
 
-use alloc::{string::String, vec::Vec};
+use alloc::{boxed::Box, string::String, vec::Vec};
 
 use snafu::prelude::*;
 use zeroize::Zeroizing;
@@ -30,7 +30,7 @@ use zeroize::Zeroizing;
 use crate::hex::{Hex, HexError, from_hex, to_hex, to_hex_trimmed};
 
 /// Errors for [ByteArray] trait.
-#[derive(Debug, Snafu, PartialEq, Eq)]
+#[derive(Debug, Clone, Snafu, PartialEq, Eq)]
 pub enum ByteArrayError {
     /// An array can't be parsed.
     #[snafu(display("Could not create a ByteArray when converting from a different format: `{reason}'"))]
@@ -85,6 +85,20 @@ impl ByteArray for Vec<u8> {
 
     fn as_bytes(&self) -> &[u8] {
         Vec::as_slice(self)
+    }
+}
+
+impl ByteArray for Box<[u8]> {
+    fn to_vec(&self) -> Vec<u8> {
+        self.as_ref().to_vec()
+    }
+
+    fn from_canonical_bytes(bytes: &[u8]) -> Result<Self, ByteArrayError> {
+        Ok(Vec::from(bytes).into_boxed_slice())
+    }
+
+    fn as_bytes(&self) -> &[u8] {
+        self.as_ref()
     }
 }
 
@@ -169,5 +183,17 @@ mod test {
 
         let err = <[u8; 32]>::from_hex("abcd").unwrap_err();
         assert!(matches!(err, HexError::HexConversionError {}));
+    }
+
+    #[test]
+    fn from_to_boxed_slice() {
+        let boxed = Box::<[u8]>::from_hex("010203ff").unwrap();
+        assert_eq!(boxed.as_bytes(), &[1, 2, 3, 255]);
+        assert_eq!(boxed.to_vec(), vec![1, 2, 3, 255]);
+        assert_eq!(boxed.to_hex().unwrap(), "010203ff");
+
+        let err = <[u8; 4]>::from_canonical_bytes(&[1, 2]).unwrap_err();
+        let cloned_err = err.clone();
+        assert_eq!(cloned_err, ByteArrayError::IncorrectLength {});
     }
 }
