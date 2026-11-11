@@ -23,6 +23,7 @@
 //! A set of useful and commonly used utilities that are used in several places in the Tari project.
 
 #![no_std]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 // This is to allow no_std use
 #[allow(unused_imports)]
 #[macro_use]
